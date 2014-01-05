@@ -86,7 +86,12 @@ int print_snake(int time, int x[], int y[], int length)
     for (int i = 0;i<length;i++)
     {
         if (time - i >= 0)
-            color_str(y[time-i], x[time-i], -1, -1, "@");
+        {
+            if (i == 0)
+                color_str(y[time-i], x[time-i], -1, -1, "*");
+            else
+                color_str(y[time-i], x[time-i], -1, -1, "@");
+        }
         else
             color_str(y[MAX_SNAKE_LENGTH-i+time], x[MAX_SNAKE_LENGTH-i+time], -1, -1, "@");
     }
