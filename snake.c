@@ -7,6 +7,8 @@
 #define HEADER_ROWS 1
 #define FOOTER_ROWS 1
 
+#define MAX_SNAKE_LENGTH 50
+
 void usage(char *argv0)
 {
     printf("USAGE: %s [height] [half|full]\n", argv0);
@@ -55,7 +57,7 @@ int print_header(int maxY, int maxX)
     return 0;
 }
 
-int print_footer(int maxY, int x, int y)
+int print_footer(int maxY, int x, int y, int time)
 {
     char buf[50];
     int footer_width = 0;
@@ -70,6 +72,25 @@ int print_footer(int maxY, int x, int y)
     mvaddstr(maxY - 1, ++footer_width, buf);
     footer_width += char_ret2;
 
+    memset(buf, '\0', sizeof buf);
+    int char_ret3 = snprintf(buf, sizeof buf, "time: %d", time);
+    mvaddstr(maxY - 1, ++footer_width, buf);
+    footer_width += char_ret3;
+
+    refresh();
+    return 0;
+}
+
+int print_snake(int time, int x[], int y[], int length)
+{
+    for (int i = 0;i<length;i++)
+    {
+        if (time - i >= 0)
+            color_str(y[time-i], x[time-i], -1, -1, "@");
+        else
+            color_str(y[MAX_SNAKE_LENGTH-i+time], x[MAX_SNAKE_LENGTH-i+time], -1, -1, "@");
+    }
+
     refresh();
     return 0;
 }
@@ -79,7 +100,8 @@ int main(int argc, char *argv[])
     WINDOW *mainwin;
     int ch;
     int maxX = 0, maxY = 0;
-    int x = 0, y = 0;
+    int x = 5, y = 5;
+    int length = 10;
 
 
     mainwin = initscr();
@@ -129,14 +151,19 @@ int main(int argc, char *argv[])
     // Enable the keypad for non-char keys
     keypad(mainwin, TRUE);
 
+    int time = 0, _x[MAX_SNAKE_LENGTH], _y[MAX_SNAKE_LENGTH];
+    memset(_x, 0, sizeof _x);
+    memset(_y, 0, sizeof _y);
 
     // Print tree and then wait for a key
     print_header(maxY, maxX);
-    print_footer(maxY, x, y);
+    print_snake(time, _x, _y, length);
+    print_footer(maxY, x, y, time);
 
     // Loop until press q
     while ((ch = getch()) != 'q')
     {
+
         switch(ch)
         {
             case '0': // Set foreground/background colors to default
@@ -152,41 +179,77 @@ int main(int argc, char *argv[])
                 attrset(COLOR_PAIR(ch - '0'));
                 break;
             case KEY_UP:
+                _x[time] = x;
+                _y[time] = y;
+
                 y -= 1;
 
                 if (y < 0 + HEADER_ROWS)
                     y = maxY - FOOTER_ROWS;
 
+                time++;
+                if (time >= MAX_SNAKE_LENGTH)
+                    time = 0;
+
+                _x[time] = x;
+                _y[time] = y;
                 break;
             case KEY_DOWN:
+                _x[time] = x;
+                _y[time] = y;
+
                 y += 1;
 
                 if ( y > maxY)
                     y = 0 + HEADER_ROWS;
 
+                time++;
+                if (time >= MAX_SNAKE_LENGTH)
+                    time = 0;
+
+                _x[time] = x;
+                _y[time] = y;
                 break;
             case KEY_RIGHT:
+                _x[time] = x;
+                _y[time] = y;
+
                 x += 1;
 
                 if (x > maxX)
                     x = 0;
 
+                time++;
+                if (time >= MAX_SNAKE_LENGTH)
+                    time = 0;
+
+                _x[time] = x;
+                _y[time] = y;
                 break;
             case KEY_LEFT:
+                _x[time] = x;
+                _y[time] = y;
+
                 x -= 1;
 
                 if (x < 0)
                     x = maxX;
 
+                time++;
+                if (time >= MAX_SNAKE_LENGTH)
+                    time = 0;
+
+                _x[time] = x;
+                _y[time] = y;
                 break;
         }
 
         erase();
         print_header(maxY, maxX);
 
-        color_str(y, x, -1, -1, "#");
+        print_snake(time, _x, _y, length);
 
-        print_footer(maxY, x, y);
+        print_footer(maxY, x, y, time);
     }
 
 
