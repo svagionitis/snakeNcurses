@@ -178,9 +178,6 @@ int main(int argc, char *argv[])
                 attrset(COLOR_PAIR(ch - '0'));
                 break;
             case KEY_UP:
-                _x[time] = x;
-                _y[time] = y;
-
                 y -= 1;
 
                 if (y < 0 + HEADER_ROWS)
@@ -194,9 +191,6 @@ int main(int argc, char *argv[])
                 _y[time] = y;
                 break;
             case KEY_DOWN:
-                _x[time] = x;
-                _y[time] = y;
-
                 y += 1;
 
                 if ( y > maxY)
@@ -210,9 +204,6 @@ int main(int argc, char *argv[])
                 _y[time] = y;
                 break;
             case KEY_RIGHT:
-                _x[time] = x;
-                _y[time] = y;
-
                 x += 1;
 
                 if (x > maxX)
@@ -226,9 +217,6 @@ int main(int argc, char *argv[])
                 _y[time] = y;
                 break;
             case KEY_LEFT:
-                _x[time] = x;
-                _y[time] = y;
-
                 x -= 1;
 
                 if (x < 0)
