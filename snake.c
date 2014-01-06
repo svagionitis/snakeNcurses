@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
                 y -= 1;
 
                 if (y < 0 + HEADER_ROWS)
-                    y = maxY - FOOTER_ROWS;
+                    y = maxY - FOOTER_ROWS - 1;
 
                 moves++;
                 if (moves >= MAX_SNAKE_LENGTH)
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
             case KEY_DOWN:
                 y += 1;
 
-                if ( y > maxY - FOOTER_ROWS)
+                if ( y >= maxY - FOOTER_ROWS)
                     y = 0 + HEADER_ROWS;
 
                 moves++;
