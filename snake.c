@@ -51,7 +51,7 @@ int print_header(int maxY, int maxX)
     return 0;
 }
 
-int print_footer(int maxY, int x, int y, int time)
+int print_footer(int maxY, int x, int y, int moves)
 {
     char buf[50];
     int footer_width = 0;
@@ -67,7 +67,7 @@ int print_footer(int maxY, int x, int y, int time)
     footer_width += char_ret2;
 
     memset(buf, '\0', sizeof buf);
-    int char_ret3 = snprintf(buf, sizeof buf, "time: %d", time);
+    int char_ret3 = snprintf(buf, sizeof buf, "moves: %d", moves);
     mvaddstr(maxY - 1, ++footer_width, buf);
     footer_width += char_ret3;
 
@@ -75,19 +75,19 @@ int print_footer(int maxY, int x, int y, int time)
     return 0;
 }
 
-int print_snake(int time, int x[], int y[], int length)
+int print_snake(int moves, int x[], int y[], int length)
 {
     for (int i = 0;i<length;i++)
     {
-        if (time - i >= 0)
+        if (moves - i >= 0)
         {
             if (i == 0)
-                color_str(y[time-i], x[time-i], -1, -1, "*");
+                color_str(y[moves-i], x[moves-i], -1, -1, "*");
             else
-                color_str(y[time-i], x[time-i], -1, -1, "@");
+                color_str(y[moves-i], x[moves-i], -1, -1, "@");
         }
         else
-            color_str(y[MAX_SNAKE_LENGTH-i+time], x[MAX_SNAKE_LENGTH-i+time], -1, -1, "@");
+            color_str(y[MAX_SNAKE_LENGTH-i+moves], x[MAX_SNAKE_LENGTH-i+moves], -1, -1, "@");
     }
 
     refresh();
@@ -150,14 +150,14 @@ int main(int argc, char *argv[])
     // Enable the keypad for non-char keys
     keypad(mainwin, TRUE);
 
-    int time = 0, _x[MAX_SNAKE_LENGTH], _y[MAX_SNAKE_LENGTH];
+    int moves = 0, _x[MAX_SNAKE_LENGTH], _y[MAX_SNAKE_LENGTH];
     memset(_x, 0, sizeof _x);
     memset(_y, 0, sizeof _y);
 
     // Print tree and then wait for a key
     print_header(maxY, maxX);
-    print_snake(time, _x, _y, length);
-    print_footer(maxY, x, y, time);
+    print_snake(moves, _x, _y, length);
+    print_footer(maxY, x, y, moves);
 
     // Loop until press q
     while ((ch = getch()) != 'q')
@@ -183,12 +183,12 @@ int main(int argc, char *argv[])
                 if (y < 0 + HEADER_ROWS)
                     y = maxY - FOOTER_ROWS;
 
-                time++;
-                if (time >= MAX_SNAKE_LENGTH)
-                    time = 0;
+                moves++;
+                if (moves >= MAX_SNAKE_LENGTH)
+                    moves = 0;
 
-                _x[time] = x;
-                _y[time] = y;
+                _x[moves] = x;
+                _y[moves] = y;
                 break;
             case KEY_DOWN:
                 y += 1;
@@ -196,12 +196,12 @@ int main(int argc, char *argv[])
                 if ( y > maxY)
                     y = 0 + HEADER_ROWS;
 
-                time++;
-                if (time >= MAX_SNAKE_LENGTH)
-                    time = 0;
+                moves++;
+                if (moves >= MAX_SNAKE_LENGTH)
+                    moves = 0;
 
-                _x[time] = x;
-                _y[time] = y;
+                _x[moves] = x;
+                _y[moves] = y;
                 break;
             case KEY_RIGHT:
                 x += 1;
@@ -209,12 +209,12 @@ int main(int argc, char *argv[])
                 if (x > maxX)
                     x = 0;
 
-                time++;
-                if (time >= MAX_SNAKE_LENGTH)
-                    time = 0;
+                moves++;
+                if (moves >= MAX_SNAKE_LENGTH)
+                    moves = 0;
 
-                _x[time] = x;
-                _y[time] = y;
+                _x[moves] = x;
+                _y[moves] = y;
                 break;
             case KEY_LEFT:
                 x -= 1;
@@ -222,21 +222,21 @@ int main(int argc, char *argv[])
                 if (x < 0)
                     x = maxX;
 
-                time++;
-                if (time >= MAX_SNAKE_LENGTH)
-                    time = 0;
+                moves++;
+                if (moves >= MAX_SNAKE_LENGTH)
+                    moves = 0;
 
-                _x[time] = x;
-                _y[time] = y;
+                _x[moves] = x;
+                _y[moves] = y;
                 break;
         }
 
         erase();
         print_header(maxY, maxX);
 
-        print_snake(time, _x, _y, length);
+        print_snake(moves, _x, _y, length);
 
-        print_footer(maxY, x, y, time);
+        print_footer(maxY, x, y, moves);
     }
 
 
