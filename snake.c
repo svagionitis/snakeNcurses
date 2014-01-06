@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
             case KEY_DOWN:
                 y += 1;
 
-                if ( y > maxY)
+                if ( y > maxY - FOOTER_ROWS)
                     y = 0 + HEADER_ROWS;
 
                 moves++;
