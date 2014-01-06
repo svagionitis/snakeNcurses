@@ -9,12 +9,6 @@
 
 #define MAX_SNAKE_LENGTH 50
 
-void usage(char *argv0)
-{
-    printf("USAGE: %s [height] [half|full]\n", argv0);
-    exit(-1);
-}
-
 int color_str(int y, int x, short fg_color, short bg_color, const char * str)
 {
     short i;
