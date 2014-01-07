@@ -87,20 +87,20 @@ int print_snake(int moves, int x[], int y[], int length)
             if (i == 0) // The head of snake
             {
                 if (y[moves] - y[moves-1] < 0) // Up
-                    color_str(y[moves-i], x[moves-i], -1, -1, "^");
+                    color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, "^");
                 else if (y[moves] - y[moves-1] > 0) // Down
-                    color_str(y[moves-i], x[moves-i], -1, -1, "v");
+                    color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, "v");
 
                 if (x[moves] - x[moves-1] < 0) // Left
-                    color_str(y[moves-i], x[moves-i], -1, -1, "<");
+                    color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, "<");
                 else if (x[moves] - x[moves-1] > 0) // Right
-                    color_str(y[moves-i], x[moves-i], -1, -1, ">");
+                    color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, ">");
             }
             else
-                color_str(y[moves-i], x[moves-i], -1, -1, "#");
+                color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, "#");
         }
         else
-            color_str(y[MAX_SNAKE_LENGTH-i+moves], x[MAX_SNAKE_LENGTH-i+moves], -1, -1, "#");
+            color_str(y[MAX_SNAKE_LENGTH-i+moves], x[MAX_SNAKE_LENGTH-i+moves], COLOR_WHITE, COLOR_BLACK, "#");
     }
 
     refresh();
@@ -120,7 +120,7 @@ int print_food(int maxX, int maxY)
     int x_rand = ((maxX - 1) + 1) * ((double)rand()/RAND_MAX);
     int y_rand = ((((maxY - 1) - FOOTER_ROWS) - HEADER_ROWS + 1) * ((double)rand()/RAND_MAX)) + HEADER_ROWS;
 
-    color_str(y_rand, x_rand, -1, -1, "§");
+    color_str(y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
 
     refresh();
 
