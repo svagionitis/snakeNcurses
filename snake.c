@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
     memset(_x, 0, sizeof _x);
     memset(_y, 0, sizeof _y);
 
-    // Print tree and then wait for a key
+    // Print header, footer, snake and food and then wait for a key
     print_header(maxY, maxX);
     print_snake(moves, _x, _y, length);
     print_food(maxX, maxY);
@@ -266,12 +266,10 @@ int main(int argc, char *argv[])
         }
 
         erase();
+
         print_header(maxY, maxX);
-
         print_snake(moves, _x, _y, length);
-
         print_food(maxX, maxY);
-
         print_footer(maxY, x, y, moves);
     }
 
