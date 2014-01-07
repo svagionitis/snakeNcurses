@@ -11,6 +11,7 @@
 
 #define MAX_SNAKE_LENGTH 50
 
+
 int color_str(int y, int x, short fg_color, short bg_color, const char * str)
 {
     short i;
@@ -83,13 +84,23 @@ int print_snake(int moves, int x[], int y[], int length)
     {
         if (moves - i >= 0)
         {
-            if (i == 0)
-                color_str(y[moves-i], x[moves-i], -1, -1, "*");
+            if (i == 0) // The head of snake
+            {
+                if (y[moves] - y[moves-1] < 0) // Up
+                    color_str(y[moves-i], x[moves-i], -1, -1, "^");
+                else if (y[moves] - y[moves-1] > 0) // Down
+                    color_str(y[moves-i], x[moves-i], -1, -1, "v");
+
+                if (x[moves] - x[moves-1] < 0) // Left
+                    color_str(y[moves-i], x[moves-i], -1, -1, "<");
+                else if (x[moves] - x[moves-1] > 0) // Right
+                    color_str(y[moves-i], x[moves-i], -1, -1, ">");
+            }
             else
-                color_str(y[moves-i], x[moves-i], -1, -1, "@");
+                color_str(y[moves-i], x[moves-i], -1, -1, "#");
         }
         else
-            color_str(y[MAX_SNAKE_LENGTH-i+moves], x[MAX_SNAKE_LENGTH-i+moves], -1, -1, "@");
+            color_str(y[MAX_SNAKE_LENGTH-i+moves], x[MAX_SNAKE_LENGTH-i+moves], -1, -1, "#");
     }
 
     refresh();
@@ -122,7 +133,7 @@ int main(int argc, char *argv[])
     int ch;
     int maxX = 0, maxY = 0;
     int x = 5, y = 5;
-    int length = 10;
+    int length = 5;
 
 
     mainwin = initscr();
