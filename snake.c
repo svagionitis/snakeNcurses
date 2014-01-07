@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+#include <sys/time.h>
 #include <curses.h>
 
 #define HEADER_ROWS 1
@@ -94,6 +96,26 @@ int print_snake(int moves, int x[], int y[], int length)
     return 0;
 }
 
+int print_food(int maxX, int maxY)
+{
+    struct timeval t;
+
+    gettimeofday(&t, NULL);
+
+    // Seed microseconds
+    srand(t.tv_usec * t.tv_sec);
+
+    // Get random range formula from http://c-faq.com/lib/randrange.html and http://stackoverflow.com/a/2509699
+    int x_rand = ((maxX - 1) + 1) * ((double)rand()/RAND_MAX);
+    int y_rand = ((((maxY - 1) - FOOTER_ROWS) - HEADER_ROWS + 1) * ((double)rand()/RAND_MAX)) + HEADER_ROWS;
+
+    color_str(y_rand, x_rand, -1, -1, "§");
+
+    refresh();
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     WINDOW *mainwin;
@@ -157,6 +179,7 @@ int main(int argc, char *argv[])
     // Print tree and then wait for a key
     print_header(maxY, maxX);
     print_snake(moves, _x, _y, length);
+    print_food(maxX, maxY);
     print_footer(maxY, x, y, moves);
 
     // Loop until press q
@@ -235,6 +258,8 @@ int main(int argc, char *argv[])
         print_header(maxY, maxX);
 
         print_snake(moves, _x, _y, length);
+
+        print_food(maxX, maxY);
 
         print_footer(maxY, x, y, moves);
     }
