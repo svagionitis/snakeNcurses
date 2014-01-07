@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     WINDOW *mainwin;
     int ch;
     int maxX = 0, maxY = 0;
-    int x = 5, y = 5;
+    int x = 0, y = 0;
     int length = 5;
 
 
@@ -145,6 +145,8 @@ int main(int argc, char *argv[])
 
     // Get the maximum size of the screen
     getmaxyx(mainwin, maxY, maxX);
+    x = maxX / 2;
+    y = maxY / 2;
 
     // Check if colors are supported
     if (!has_colors())
