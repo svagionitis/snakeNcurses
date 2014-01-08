@@ -1,4 +1,4 @@
-/*Build: gcc -std=c99 -o snake snake.c -lncurses*/
+/*Build: gcc -D_BSD_SOURCE -std=c99 -o snake snake.c -lncurses*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -55,7 +55,7 @@ int print_header(int maxY, int maxX)
     return 0;
 }
 
-int print_footer(int maxY, int x, int y, int moves, useconds_t speed)
+int print_footer(int maxY, int x, int y, int moves, unsigned int speed)
 {
     char buf[50];
     int footer_width = 0;
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     int maxX = 0, maxY = 0;
     int x = 0, y = 0;
     int length = 5;
-    useconds_t speed = 1000000;
+    unsigned int speed = 1000000;
 
 
     mainwin = initscr();
