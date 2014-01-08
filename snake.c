@@ -1,4 +1,4 @@
-/*Build: gcc -D_BSD_SOURCE -std=c99 -o snake snake.c -lncurses*/
+/*Build: gcc -D_BSD_SOURCE -std=c99 -o snake snake.c -lncurses -lpthread*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,6 +6,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <curses.h>
+#include <pthread.h>
 
 #define HEADER_ROWS 1
 #define FOOTER_ROWS 1
@@ -51,84 +52,83 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
     return 0;
 }
 
-int print_header(int maxY, int maxX)
+void print_header()
 {
     char buf[50];
     int header_width = 0;
 
     memset(buf, '\0', sizeof buf);
-    int char_ret1 = snprintf(buf, sizeof buf, "Max Height: %d", maxY);
+    int char_ret1 = snprintf(buf, sizeof buf, "Max Height: %d", snake_p.maxY);
     mvaddstr(0, 0, buf);
     header_width += char_ret1;
 
     memset(buf, '\0', sizeof buf);
-    int char_ret2 = snprintf(buf, sizeof buf, "Max Width: %d", maxX);
+    int char_ret2 = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.maxX);
     mvaddstr(0, ++header_width, buf);
     header_width += char_ret2;
 
     refresh();
-    return 0;
 }
 
-int print_footer(int maxY, int x, int y, int moves, unsigned int speed)
+void print_footer()
 {
     char buf[50];
     int footer_width = 0;
 
     memset(buf, '\0', sizeof buf);
-    int char_ret1 = snprintf(buf, sizeof buf, "x: %d", x);
-    mvaddstr(maxY - 1, 0, buf);
+    int char_ret1 = snprintf(buf, sizeof buf, "x: %d", snake_p.x);
+    mvaddstr(snake_p.maxY - 1, 0, buf);
     footer_width += char_ret1;
 
     memset(buf, '\0', sizeof buf);
-    int char_ret2 = snprintf(buf, sizeof buf, "y: %d", y);
-    mvaddstr(maxY - 1, ++footer_width, buf);
+    int char_ret2 = snprintf(buf, sizeof buf, "y: %d", snake_p.y);
+    mvaddstr(snake_p.maxY - 1, ++footer_width, buf);
     footer_width += char_ret2;
 
     memset(buf, '\0', sizeof buf);
-    int char_ret3 = snprintf(buf, sizeof buf, "moves: %d", moves);
-    mvaddstr(maxY - 1, ++footer_width, buf);
+    int char_ret3 = snprintf(buf, sizeof buf, "moves: %d", snake_p.moves);
+    mvaddstr(snake_p.maxY - 1, ++footer_width, buf);
     footer_width += char_ret3;
 
     memset(buf, '\0', sizeof buf);
-    int char_ret4 = snprintf(buf, sizeof buf, "speed: %u", speed);
-    mvaddstr(maxY - 1, ++footer_width, buf);
+    int char_ret4 = snprintf(buf, sizeof buf, "speed: %u", snake_p.speed);
+    mvaddstr(snake_p.maxY - 1, ++footer_width, buf);
     footer_width += char_ret4;
 
     refresh();
-    return 0;
 }
 
-int print_snake(int moves, int x[], int y[], int length)
+void print_snake()
 {
-    for (int i = 0;i<length;i++)
+    for (int i = 0;i<snake_p.length;i++)
     {
-        if (moves - i >= 0)
+        if (snake_p.moves - i >= 0)
         {
             if (i == 0) // The head of snake
             {
-                if (y[moves] - y[moves-1] < 0) // Up
-                    color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, "^");
-                else if (y[moves] - y[moves-1] > 0) // Down
-                    color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, "v");
+                if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] < 0) // Up
+                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "^");
+                else if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] > 0) // Down
+                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "v");
 
-                if (x[moves] - x[moves-1] < 0) // Left
-                    color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, "<");
-                else if (x[moves] - x[moves-1] > 0) // Right
-                    color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, ">");
+                if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] < 0) // Left
+                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "<");
+                else if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] > 0) // Right
+                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, ">");
             }
             else
-                color_str(y[moves-i], x[moves-i], COLOR_WHITE, COLOR_BLACK, "#");
+                color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "#");
         }
         else
-            color_str(y[MAX_SNAKE_LENGTH-i+moves], x[MAX_SNAKE_LENGTH-i+moves], COLOR_WHITE, COLOR_BLACK, "#");
+            color_str(snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
     }
 
     refresh();
-    return 0;
+
+    usleep(snake_p.speed);
 }
 
-int print_food(int maxX, int maxY)
+void print_food()
 {
     struct timeval t;
 
@@ -138,18 +138,18 @@ int print_food(int maxX, int maxY)
     srand(t.tv_usec * t.tv_sec);
 
     // Get random range formula from http://c-faq.com/lib/randrange.html and http://stackoverflow.com/a/2509699
-    int x_rand = ((maxX - 1) + 1) * ((double)rand()/RAND_MAX);
-    int y_rand = ((((maxY - 1) - FOOTER_ROWS) - HEADER_ROWS + 1) * ((double)rand()/RAND_MAX)) + HEADER_ROWS;
+    int x_rand = ((snake_p.maxX - 1) + 1) * ((double)rand()/RAND_MAX);
+    int y_rand = ((((snake_p.maxY - 1) - FOOTER_ROWS) - HEADER_ROWS + 1) * ((double)rand()/RAND_MAX)) + HEADER_ROWS;
 
     color_str(y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
 
     refresh();
-    return 0;
 }
 
 int main(int argc, char *argv[])
 {
     WINDOW *mainwin;
+    pthread_t thread_snake;
 
     memset(&snake_p, 0, sizeof snake_p);
 
@@ -232,6 +232,7 @@ int main(int argc, char *argv[])
         if (snake_p.ch == KEY_UP || snake_p.ch == KEY_DOWN || snake_p.ch == KEY_LEFT || snake_p.ch == KEY_RIGHT)
             last_char = snake_p.ch;
 
+        { // In thread with the sleep
         switch(snake_p.ch)
         {
             case KEY_UP:
@@ -306,14 +307,12 @@ int main(int argc, char *argv[])
 
                 break;
         }
+        }
 
-        print_header(snake_p.maxY, snake_p.maxX);
-        print_snake(snake_p.moves, snake_p.move_x, snake_p.move_y, snake_p.length);
-        print_food(snake_p.maxX, snake_p.maxY);
-        print_footer(snake_p.maxY, snake_p.x, snake_p.y, snake_p.moves, snake_p.speed);
-
-        usleep(snake_p.speed);
-
+        print_header();
+        print_food();
+        print_footer();
+        print_snake();
     }
 
     delwin(mainwin);
