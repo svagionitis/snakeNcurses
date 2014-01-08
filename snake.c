@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
 #include <curses.h>
@@ -54,7 +55,7 @@ int print_header(int maxY, int maxX)
     return 0;
 }
 
-int print_footer(int maxY, int x, int y, int moves)
+int print_footer(int maxY, int x, int y, int moves, useconds_t speed)
 {
     char buf[50];
     int footer_width = 0;
@@ -73,6 +74,11 @@ int print_footer(int maxY, int x, int y, int moves)
     int char_ret3 = snprintf(buf, sizeof buf, "moves: %d", moves);
     mvaddstr(maxY - 1, ++footer_width, buf);
     footer_width += char_ret3;
+
+    memset(buf, '\0', sizeof buf);
+    int char_ret4 = snprintf(buf, sizeof buf, "speed: %u", speed);
+    mvaddstr(maxY - 1, ++footer_width, buf);
+    footer_width += char_ret4;
 
     refresh();
     return 0;
@@ -134,6 +140,7 @@ int main(int argc, char *argv[])
     int maxX = 0, maxY = 0;
     int x = 0, y = 0;
     int length = 5;
+    useconds_t speed = 1000000;
 
 
     mainwin = initscr();
@@ -174,6 +181,13 @@ int main(int argc, char *argv[])
 
     clear();
 
+    // The timeout and wtimeout routines set blocking or non-blocking 
+    // read for a given window. If delay is negative, blocking read is used 
+    // (i.e., waits indefinitely for input). If delay is zero, then non-blocking 
+    // read is used (i.e., read returns ERR if no input is waiting). If delay is 
+    // positive, then read blocks for delay milliseconds, and returns ERR 
+    // if there is still no input.
+    timeout(0);
     // Turn off key echoing
     noecho();
     // Line buffering disabled
@@ -186,18 +200,26 @@ int main(int argc, char *argv[])
     keypad(mainwin, TRUE);
 
     int moves = 0, _x[MAX_SNAKE_LENGTH], _y[MAX_SNAKE_LENGTH];
-    memset(_x, 0, sizeof _x);
-    memset(_y, 0, sizeof _y);
+    memset(_x, -1, sizeof _x);
+    memset(_y, -1, sizeof _y);
 
     // Print header, footer, snake and food and then wait for a key
     print_header(maxY, maxX);
     print_snake(moves, _x, _y, length);
     print_food(maxX, maxY);
-    print_footer(maxY, x, y, moves);
+    print_footer(maxY, x, y, moves, speed);
 
-    // Loop until press q
-    while ((ch = getch()) != 'q')
+
+    while(1)
     {
+        int last_char;
+
+        // Get keyboard input non-blocking
+        ch = getch();
+        if (ch == ERR)
+            ch = last_char;
+        else if (ch == 'q')
+            break;
 
         switch(ch)
         {
@@ -253,6 +275,25 @@ int main(int argc, char *argv[])
                 _x[moves] = x;
                 _y[moves] = y;
                 break;
+            case '+':
+                speed += 100;
+
+                break;
+            case '-':
+                speed -= 100;
+
+                break;
+            case '*':
+                speed *= 10;
+
+                break;
+            case '/':
+                speed /= 10;
+
+                if (speed < 1)
+                    speed = 1;
+
+                break;
         }
 
         erase();
@@ -260,7 +301,11 @@ int main(int argc, char *argv[])
         print_header(maxY, maxX);
         print_snake(moves, _x, _y, length);
         print_food(maxX, maxY);
-        print_footer(maxY, x, y, moves);
+        print_footer(maxY, x, y, moves, speed);
+        usleep(speed);
+
+        if (ch == KEY_UP || ch == KEY_DOWN || ch == KEY_LEFT || ch == KEY_RIGHT)
+            last_char = ch;
     }
 
 
