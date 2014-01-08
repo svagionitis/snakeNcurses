@@ -201,18 +201,6 @@ int main(int argc, char *argv[])
 
         switch(ch)
         {
-            case '0': // Set foreground/background colors to default
-            case '1': // Set foreground/background colors according to init_pairs
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                attrset(COLOR_PAIR(ch - '0'));
-                break;
             case KEY_UP:
                 y -= 1;
 
