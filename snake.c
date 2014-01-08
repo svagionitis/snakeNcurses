@@ -1,4 +1,4 @@
-/*Build: gcc -D_BSD_SOURCE -std=c99 -o snake snake.c -lncurses -lpthread*/
+/*Build: gcc -D_BSD_SOURCE -std=c99 -o snake snake.c -lncurses*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,7 +6,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <curses.h>
-#include <pthread.h>
 
 #define HEADER_ROWS 1
 #define FOOTER_ROWS 1
@@ -26,6 +25,8 @@ typedef struct snake_param
     int length;
     unsigned int speed;
 } snake_param_t;
+
+snake_param_t snake_p;
 
 int color_str(int y, int x, short fg_color, short bg_color, const char * str)
 {
@@ -48,104 +49,6 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
 
     attroff(COLOR_PAIR(i));
     return 0;
-}
-
-void get_keyboard_info(void *param)
-{
-    snake_param_t *p = (snake_param_t *)param;
-    int ch;
-
-    while(p->ch != 'q')
-    {
-        int last_char;
-
-        // Get keyboard input non-blocking
-        p->ch = getch();
-        if (p->ch == ERR)
-            p->ch = last_char;
-        else if (p->ch == 'q')
-            break;
-
-        switch(p->ch)
-        {
-            case KEY_UP:
-                p->y -= 1;
-
-                if (p->y < 0 + HEADER_ROWS)
-                    p->y = p->maxY - FOOTER_ROWS - 1;
-
-                p->moves++;
-                if (p->moves >= MAX_SNAKE_LENGTH)
-                    p->moves = 0;
-
-                p->move_x[p->moves] = p->x;
-                p->move_y[p->moves] = p->y;
-                break;
-            case KEY_DOWN:
-                p->y += 1;
-
-                if ( p->y >= p->maxY - FOOTER_ROWS)
-                    p->y = 0 + HEADER_ROWS;
-
-                p->moves++;
-                if (p->moves >= MAX_SNAKE_LENGTH)
-                    p->moves = 0;
-
-                p->move_x[p->moves] = p->x;
-                p->move_y[p->moves] = p->y;
-                break;
-            case KEY_RIGHT:
-                p->x += 1;
-
-                if (p->x > p->maxX)
-                    p->x = 0;
-
-                p->moves++;
-                if (p->moves >= MAX_SNAKE_LENGTH)
-                    p->moves = 0;
-
-                p->move_x[p->moves] = p->x;
-                p->move_y[p->moves] = p->y;
-                break;
-            case KEY_LEFT:
-                p->x -= 1;
-
-                if (p->x < 0)
-                    p->x = p->maxX;
-
-                p->moves++;
-                if (p->moves >= MAX_SNAKE_LENGTH)
-                    p->moves = 0;
-
-                p->move_x[p->moves] = p->x;
-                p->move_y[p->moves] = p->y;
-                break;
-            case '+':
-                p->speed += 100;
-
-                break;
-            case '-':
-                p->speed -= 100;
-
-                break;
-            case '*':
-                p->speed *= 10;
-
-                break;
-            case '/':
-                p->speed /= 10;
-
-                if (p->speed < 1)
-                    p->speed = 1;
-
-                break;
-        }
-
-        if (p->ch == KEY_UP || p->ch == KEY_DOWN || p->ch == KEY_LEFT || p->ch == KEY_RIGHT)
-            last_char = p->ch;
-    }
-
-    pthread_exit(0);
 }
 
 int print_header(int maxY, int maxX)
@@ -241,20 +144,17 @@ int print_food(int maxX, int maxY)
     color_str(y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
 
     refresh();
-
     return 0;
 }
 
 int main(int argc, char *argv[])
 {
     WINDOW *mainwin;
-    snake_param_t *snake_p;
-    pthread_t thread_kb;
 
-    snake_p = malloc(sizeof(snake_param_t));
+    memset(&snake_p, 0, sizeof snake_p);
 
-    snake_p->length = 5;
-    snake_p->speed = 1000000;
+    snake_p.length = 5;
+    snake_p.speed = 1000000;
 
     mainwin = initscr();
     if (mainwin == NULL)
@@ -264,9 +164,9 @@ int main(int argc, char *argv[])
     }
 
     // Get the maximum size of the screen
-    getmaxyx(mainwin, snake_p->maxY, snake_p->maxX);
-    snake_p->x = snake_p->maxX / 2;
-    snake_p->y = snake_p->maxY / 2;
+    getmaxyx(mainwin, snake_p.maxY, snake_p.maxX);
+    snake_p.x = snake_p.maxX / 2;
+    snake_p.y = snake_p.maxY / 2;
 
     // Check if colors are supported
     if (!has_colors())
@@ -312,33 +212,110 @@ int main(int argc, char *argv[])
     // Enable the keypad for non-char keys
     keypad(mainwin, TRUE);
 
-    memset(snake_p->move_x, -1, sizeof snake_p->move_x);
-    memset(snake_p->move_y, -1, sizeof snake_p->move_y);
-
-    // Print header, footer, snake and food and then wait for a key
-    print_header(snake_p->maxY, snake_p->maxX);
-    print_snake(snake_p->moves, snake_p->move_x, snake_p->move_y, snake_p->length);
-    print_food(snake_p->maxX, snake_p->maxY);
-    print_footer(snake_p->maxY, snake_p->x, snake_p->y, snake_p->moves, snake_p->speed);
+    memset(snake_p.move_x, -1, sizeof snake_p.move_x);
+    memset(snake_p.move_y, -1, sizeof snake_p.move_y);
 
 
-    pthread_create (&thread_kb, NULL, (void *) &get_keyboard_info, (void *) snake_p);
-
-    pthread_join(thread_kb, NULL);
-
-    while(snake_p->ch != 'q')
+    while(snake_p.ch != 'q')
     {
-
         erase();
 
-        print_header(snake_p->maxY, snake_p->maxX);
-        print_snake(snake_p->moves, snake_p->move_x, snake_p->move_y, snake_p->length);
-        print_food(snake_p->maxX, snake_p->maxY);
-        print_footer(snake_p->maxY, snake_p->x, snake_p->y, snake_p->moves, snake_p->speed);
-        usleep(snake_p->speed);
+        int last_char;
+
+        // Get keyboard input non-blocking
+        snake_p.ch = getch();
+        if (snake_p.ch == ERR)
+            snake_p.ch = last_char;
+        else if (snake_p.ch == 'q')
+            break;
+
+        if (snake_p.ch == KEY_UP || snake_p.ch == KEY_DOWN || snake_p.ch == KEY_LEFT || snake_p.ch == KEY_RIGHT)
+            last_char = snake_p.ch;
+
+        switch(snake_p.ch)
+        {
+            case KEY_UP:
+                snake_p.y -= 1;
+
+                if (snake_p.y < 0 + HEADER_ROWS)
+                    snake_p.y = snake_p.maxY - FOOTER_ROWS - 1;
+
+                snake_p.moves++;
+                if (snake_p.moves >= MAX_SNAKE_LENGTH)
+                    snake_p.moves = 0;
+
+                snake_p.move_x[snake_p.moves] = snake_p.x;
+                snake_p.move_y[snake_p.moves] = snake_p.y;
+                break;
+            case KEY_DOWN:
+                snake_p.y += 1;
+
+                if ( snake_p.y >= snake_p.maxY - FOOTER_ROWS)
+                    snake_p.y = 0 + HEADER_ROWS;
+
+                snake_p.moves++;
+                if (snake_p.moves >= MAX_SNAKE_LENGTH)
+                    snake_p.moves = 0;
+
+                snake_p.move_x[snake_p.moves] = snake_p.x;
+                snake_p.move_y[snake_p.moves] = snake_p.y;
+                break;
+            case KEY_RIGHT:
+                snake_p.x += 1;
+
+                if (snake_p.x > snake_p.maxX)
+                    snake_p.x = 0;
+
+                snake_p.moves++;
+                if (snake_p.moves >= MAX_SNAKE_LENGTH)
+                    snake_p.moves = 0;
+
+                snake_p.move_x[snake_p.moves] = snake_p.x;
+                snake_p.move_y[snake_p.moves] = snake_p.y;
+                break;
+            case KEY_LEFT:
+                snake_p.x -= 1;
+
+                if (snake_p.x < 0)
+                    snake_p.x = snake_p.maxX;
+
+                snake_p.moves++;
+                if (snake_p.moves >= MAX_SNAKE_LENGTH)
+                    snake_p.moves = 0;
+
+                snake_p.move_x[snake_p.moves] = snake_p.x;
+                snake_p.move_y[snake_p.moves] = snake_p.y;
+                break;
+            case '+':
+                snake_p.speed += 100;
+
+                break;
+            case '-':
+                snake_p.speed -= 100;
+
+                break;
+            case '*':
+                snake_p.speed *= 10;
+
+                break;
+            case '/':
+                snake_p.speed /= 10;
+
+                if (snake_p.speed < 1)
+                    snake_p.speed = 1;
+
+                break;
+        }
+
+        print_header(snake_p.maxY, snake_p.maxX);
+        print_snake(snake_p.moves, snake_p.move_x, snake_p.move_y, snake_p.length);
+        print_food(snake_p.maxX, snake_p.maxY);
+        print_footer(snake_p.maxY, snake_p.x, snake_p.y, snake_p.moves, snake_p.speed);
+
+        usleep(snake_p.speed);
+
     }
 
-    free(snake_p);
     delwin(mainwin);
     endwin();
     refresh();
