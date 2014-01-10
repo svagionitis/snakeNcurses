@@ -52,7 +52,7 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
     return 0;
 }
 
-void print_header()
+void *print_header()
 {
     char buf[50];
     int header_width = 0;
@@ -66,11 +66,9 @@ void print_header()
     int char_ret2 = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.maxX);
     mvaddstr(0, ++header_width, buf);
     header_width += char_ret2;
-
-    refresh();
 }
 
-void print_footer()
+void *print_footer()
 {
     char buf[50];
     int footer_width = 0;
@@ -94,11 +92,9 @@ void print_footer()
     int char_ret4 = snprintf(buf, sizeof buf, "speed: %u", snake_p.speed);
     mvaddstr(snake_p.maxY - 1, ++footer_width, buf);
     footer_width += char_ret4;
-
-    refresh();
 }
 
-void print_snake()
+void *print_snake()
 {
     for (int i = 0;i<snake_p.length;i++)
     {
@@ -122,13 +118,9 @@ void print_snake()
         else
             color_str(snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
     }
-
-    refresh();
-
-    usleep(snake_p.speed);
 }
 
-void print_food()
+void *print_food()
 {
     struct timeval t;
 
@@ -142,8 +134,115 @@ void print_food()
     int y_rand = ((((snake_p.maxY - 1) - FOOTER_ROWS) - HEADER_ROWS + 1) * ((double)rand()/RAND_MAX)) + HEADER_ROWS;
 
     color_str(y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
+}
 
-    refresh();
+void *control_snake()
+{
+    while(snake_p.ch != 'q')
+    {
+        clear();
+
+        int last_char;
+
+        // Get keyboard input non-blocking
+        snake_p.ch = getch();
+        if (snake_p.ch == ERR)
+            snake_p.ch = last_char;
+        else if (snake_p.ch == 'q')
+            break;
+
+        if (snake_p.ch == KEY_UP || snake_p.ch == KEY_DOWN || snake_p.ch == KEY_LEFT || snake_p.ch == KEY_RIGHT)
+            last_char = snake_p.ch;
+
+        // In thread with the sleep
+        switch(snake_p.ch)
+        {
+            case KEY_UP:
+                snake_p.y -= 1;
+
+                if (snake_p.y < 0 + HEADER_ROWS)
+                    snake_p.y = snake_p.maxY - FOOTER_ROWS - 1;
+
+                snake_p.moves++;
+                if (snake_p.moves >= MAX_SNAKE_LENGTH)
+                    snake_p.moves = 0;
+
+                snake_p.move_x[snake_p.moves] = snake_p.x;
+                snake_p.move_y[snake_p.moves] = snake_p.y;
+
+                break;
+            case KEY_DOWN:
+                snake_p.y += 1;
+
+                if ( snake_p.y >= snake_p.maxY - FOOTER_ROWS)
+                    snake_p.y = 0 + HEADER_ROWS;
+
+                snake_p.moves++;
+                if (snake_p.moves >= MAX_SNAKE_LENGTH)
+                    snake_p.moves = 0;
+
+                snake_p.move_x[snake_p.moves] = snake_p.x;
+                snake_p.move_y[snake_p.moves] = snake_p.y;
+
+                break;
+            case KEY_RIGHT:
+                snake_p.x += 1;
+
+                if (snake_p.x > snake_p.maxX)
+                    snake_p.x = 0;
+
+                snake_p.moves++;
+                if (snake_p.moves >= MAX_SNAKE_LENGTH)
+                    snake_p.moves = 0;
+
+                snake_p.move_x[snake_p.moves] = snake_p.x;
+                snake_p.move_y[snake_p.moves] = snake_p.y;
+
+                break;
+            case KEY_LEFT:
+                snake_p.x -= 1;
+
+                if (snake_p.x < 0)
+                    snake_p.x = snake_p.maxX;
+
+                snake_p.moves++;
+                if (snake_p.moves >= MAX_SNAKE_LENGTH)
+                    snake_p.moves = 0;
+
+                snake_p.move_x[snake_p.moves] = snake_p.x;
+                snake_p.move_y[snake_p.moves] = snake_p.y;
+
+                break;
+            case '+':
+                snake_p.speed += 100;
+
+                break;
+            case '-':
+                snake_p.speed -= 100;
+
+                break;
+            case '*':
+                snake_p.speed *= 10;
+
+                break;
+            case '/':
+                snake_p.speed /= 10;
+
+                if (snake_p.speed < 1)
+                    snake_p.speed = 1;
+
+                break;
+        }
+
+        print_snake();
+
+        refresh();
+        usleep(snake_p.speed);
+    }
+}
+
+void *threadfunc()
+{
 }
 
 int main(int argc, char *argv[])
@@ -215,105 +314,23 @@ int main(int argc, char *argv[])
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
     memset(snake_p.move_y, -1, sizeof snake_p.move_y);
 
+    pthread_create(&thread_snake, NULL, threadfunc, NULL);
+
 
     while(snake_p.ch != 'q')
     {
-        erase();
-
-        int last_char;
-
-        // Get keyboard input non-blocking
-        snake_p.ch = getch();
-        if (snake_p.ch == ERR)
-            snake_p.ch = last_char;
-        else if (snake_p.ch == 'q')
-            break;
-
-        if (snake_p.ch == KEY_UP || snake_p.ch == KEY_DOWN || snake_p.ch == KEY_LEFT || snake_p.ch == KEY_RIGHT)
-            last_char = snake_p.ch;
-
-        { // In thread with the sleep
-        switch(snake_p.ch)
-        {
-            case KEY_UP:
-                snake_p.y -= 1;
-
-                if (snake_p.y < 0 + HEADER_ROWS)
-                    snake_p.y = snake_p.maxY - FOOTER_ROWS - 1;
-
-                snake_p.moves++;
-                if (snake_p.moves >= MAX_SNAKE_LENGTH)
-                    snake_p.moves = 0;
-
-                snake_p.move_x[snake_p.moves] = snake_p.x;
-                snake_p.move_y[snake_p.moves] = snake_p.y;
-                break;
-            case KEY_DOWN:
-                snake_p.y += 1;
-
-                if ( snake_p.y >= snake_p.maxY - FOOTER_ROWS)
-                    snake_p.y = 0 + HEADER_ROWS;
-
-                snake_p.moves++;
-                if (snake_p.moves >= MAX_SNAKE_LENGTH)
-                    snake_p.moves = 0;
-
-                snake_p.move_x[snake_p.moves] = snake_p.x;
-                snake_p.move_y[snake_p.moves] = snake_p.y;
-                break;
-            case KEY_RIGHT:
-                snake_p.x += 1;
-
-                if (snake_p.x > snake_p.maxX)
-                    snake_p.x = 0;
-
-                snake_p.moves++;
-                if (snake_p.moves >= MAX_SNAKE_LENGTH)
-                    snake_p.moves = 0;
-
-                snake_p.move_x[snake_p.moves] = snake_p.x;
-                snake_p.move_y[snake_p.moves] = snake_p.y;
-                break;
-            case KEY_LEFT:
-                snake_p.x -= 1;
-
-                if (snake_p.x < 0)
-                    snake_p.x = snake_p.maxX;
-
-                snake_p.moves++;
-                if (snake_p.moves >= MAX_SNAKE_LENGTH)
-                    snake_p.moves = 0;
-
-                snake_p.move_x[snake_p.moves] = snake_p.x;
-                snake_p.move_y[snake_p.moves] = snake_p.y;
-                break;
-            case '+':
-                snake_p.speed += 100;
-
-                break;
-            case '-':
-                snake_p.speed -= 100;
-
-                break;
-            case '*':
-                snake_p.speed *= 10;
-
-                break;
-            case '/':
-                snake_p.speed /= 10;
-
-                if (snake_p.speed < 1)
-                    snake_p.speed = 1;
-
-                break;
-        }
-        }
+        clear();
 
         print_header();
         print_food();
         print_footer();
-        print_snake();
+
+        control_snake();
+
+        refresh();
     }
+
+    pthread_join(thread_snake, NULL);
 
     delwin(mainwin);
     endwin();
