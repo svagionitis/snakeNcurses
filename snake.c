@@ -81,22 +81,22 @@ void *print_footer(WINDOW *win)
 
     memset(buf, '\0', sizeof buf);
     int char_ret1 = snprintf(buf, sizeof buf, "x: %d", snake_p.x);
-    mvwaddstr(win, snake_p.maxY - 1, 0, buf);
+    mvwaddstr(win, 0, 0, buf);
     footer_width += char_ret1;
 
     memset(buf, '\0', sizeof buf);
     int char_ret2 = snprintf(buf, sizeof buf, "y: %d", snake_p.y);
-    mvwaddstr(win, snake_p.maxY - 1, ++footer_width, buf);
+    mvwaddstr(win, 0, ++footer_width, buf);
     footer_width += char_ret2;
 
     memset(buf, '\0', sizeof buf);
     int char_ret3 = snprintf(buf, sizeof buf, "moves: %d", snake_p.moves);
-    mvwaddstr(win, snake_p.maxY - 1, ++footer_width, buf);
+    mvwaddstr(win, 0, ++footer_width, buf);
     footer_width += char_ret3;
 
     memset(buf, '\0', sizeof buf);
     int char_ret4 = snprintf(buf, sizeof buf, "speed: %u", snake_p.speed);
-    mvwaddstr(win, snake_p.maxY - 1, ++footer_width, buf);
+    mvwaddstr(win, 0, ++footer_width, buf);
     footer_width += char_ret4;
 
     wrefresh(win);
@@ -131,8 +131,11 @@ void *print_snake(WINDOW *win)
 void *print_food(WINDOW *win)
 {
     struct timeval t;
+    int win_maxX, win_maxY;
 
-    //wclear(win);
+    getmaxyx(win, win_maxY, win_maxX);
+
+    wclear(win);
 
     gettimeofday(&t, NULL);
 
@@ -140,8 +143,8 @@ void *print_food(WINDOW *win)
     srand(t.tv_usec * t.tv_sec);
 
     // Get random range formula from http://c-faq.com/lib/randrange.html and http://stackoverflow.com/a/2509699
-    int x_rand = ((snake_p.maxX - 1) + 1) * ((double)rand()/RAND_MAX);
-    int y_rand = ((((snake_p.maxY - 1) - FOOTER_ROWS) - HEADER_ROWS + 1) * ((double)rand()/RAND_MAX)) + HEADER_ROWS;
+    int x_rand = win_maxX * ((double)rand()/RAND_MAX);
+    int y_rand = win_maxY * ((double)rand()/RAND_MAX);
 
     color_str(win, y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
 
@@ -274,7 +277,7 @@ int main(int argc, char *argv[])
 
     header_win = newwin(HEADER_ROWS, snake_p.maxX, 0, 0);
     footer_win = newwin(FOOTER_ROWS, snake_p.maxX, snake_p.maxY - FOOTER_ROWS, 0);
-    snake_win = newwin(snake_p.maxY - HEADER_ROWS- FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
+    snake_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
 
     snake_p.x = snake_p.maxX / 2;
     snake_p.y = snake_p.maxY / 2;
@@ -333,9 +336,9 @@ int main(int argc, char *argv[])
 
     while(snake_p.ch != 'q')
     {
-        //print_header(header_win);
+        print_header(header_win);
         print_food(snake_win);
-        //print_footer(footer_win);
+        print_footer(footer_win);
 
         //control_snake(snake_win);
     }
