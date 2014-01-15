@@ -29,7 +29,7 @@ typedef struct snake_param
 
 snake_param_t snake_p;
 
-int color_str(int y, int x, short fg_color, short bg_color, const char * str)
+int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const char * str)
 {
     short i;
     // Search all the pair of colors
@@ -46,55 +46,63 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
 
     attron(COLOR_PAIR(i));
 
-    mvaddstr(y,x,str);
+    mvwaddstr(win, y,x,str);
 
     attroff(COLOR_PAIR(i));
     return 0;
 }
 
-void *print_header()
+void *print_header(WINDOW *win)
 {
     char buf[50];
     int header_width = 0;
 
+    wclear(win);
+
     memset(buf, '\0', sizeof buf);
     int char_ret1 = snprintf(buf, sizeof buf, "Max Height: %d", snake_p.maxY);
-    mvaddstr(0, 0, buf);
+    mvwaddstr(win, 0, 0, buf);
     header_width += char_ret1;
 
     memset(buf, '\0', sizeof buf);
     int char_ret2 = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.maxX);
-    mvaddstr(0, ++header_width, buf);
+    mvwaddstr(win, 0, ++header_width, buf);
     header_width += char_ret2;
+
+    wrefresh(win);
 }
 
-void *print_footer()
+void *print_footer(WINDOW *win)
 {
     char buf[50];
     int footer_width = 0;
 
+    wclear(win);
+
     memset(buf, '\0', sizeof buf);
     int char_ret1 = snprintf(buf, sizeof buf, "x: %d", snake_p.x);
-    mvaddstr(snake_p.maxY - 1, 0, buf);
+    mvwaddstr(win, snake_p.maxY - 1, 0, buf);
     footer_width += char_ret1;
 
     memset(buf, '\0', sizeof buf);
     int char_ret2 = snprintf(buf, sizeof buf, "y: %d", snake_p.y);
-    mvaddstr(snake_p.maxY - 1, ++footer_width, buf);
+    mvwaddstr(win, snake_p.maxY - 1, ++footer_width, buf);
     footer_width += char_ret2;
 
     memset(buf, '\0', sizeof buf);
     int char_ret3 = snprintf(buf, sizeof buf, "moves: %d", snake_p.moves);
-    mvaddstr(snake_p.maxY - 1, ++footer_width, buf);
+    mvwaddstr(win, snake_p.maxY - 1, ++footer_width, buf);
     footer_width += char_ret3;
 
     memset(buf, '\0', sizeof buf);
     int char_ret4 = snprintf(buf, sizeof buf, "speed: %u", snake_p.speed);
-    mvaddstr(snake_p.maxY - 1, ++footer_width, buf);
+    mvwaddstr(win, snake_p.maxY - 1, ++footer_width, buf);
     footer_width += char_ret4;
+
+    wrefresh(win);
 }
 
-void *print_snake()
+void *print_snake(WINDOW *win)
 {
     for (int i = 0;i<snake_p.length;i++)
     {
@@ -103,26 +111,28 @@ void *print_snake()
             if (i == 0) // The head of snake
             {
                 if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] < 0) // Up
-                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "^");
+                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "^");
                 else if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] > 0) // Down
-                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "v");
+                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "v");
 
                 if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] < 0) // Left
-                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "<");
+                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "<");
                 else if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] > 0) // Right
-                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, ">");
+                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, ">");
             }
             else
-                color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "#");
+                color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "#");
         }
         else
-            color_str(snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
+            color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
     }
 }
 
-void *print_food()
+void *print_food(WINDOW *win)
 {
     struct timeval t;
+
+    //wclear(win);
 
     gettimeofday(&t, NULL);
 
@@ -133,14 +143,16 @@ void *print_food()
     int x_rand = ((snake_p.maxX - 1) + 1) * ((double)rand()/RAND_MAX);
     int y_rand = ((((snake_p.maxY - 1) - FOOTER_ROWS) - HEADER_ROWS + 1) * ((double)rand()/RAND_MAX)) + HEADER_ROWS;
 
-    color_str(y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
+    color_str(win, y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
+
+    wrefresh(win);
 }
 
-void *control_snake()
+void *control_snake(WINDOW *win)
 {
     while(snake_p.ch != 'q')
     {
-        clear();
+        wclear(win);
 
         int last_char;
 
@@ -234,9 +246,9 @@ void *control_snake()
                 break;
         }
 
-        print_snake();
+        print_snake(win);
 
-        refresh();
+        wrefresh(win);
         usleep(snake_p.speed);
     }
 }
@@ -247,7 +259,7 @@ void *threadfunc()
 
 int main(int argc, char *argv[])
 {
-    WINDOW *mainwin;
+    WINDOW *header_win, *footer_win, *snake_win;
     pthread_t thread_snake;
 
     memset(&snake_p, 0, sizeof snake_p);
@@ -255,22 +267,24 @@ int main(int argc, char *argv[])
     snake_p.length = 5;
     snake_p.speed = 1000000;
 
-    mainwin = initscr();
-    if (mainwin == NULL)
-    {
-        fprintf(stderr, "Error initialising ncurses.\n");
-        exit(-1);
-    }
+    initscr();
 
     // Get the maximum size of the screen
-    getmaxyx(mainwin, snake_p.maxY, snake_p.maxX);
+    getmaxyx(stdscr, snake_p.maxY, snake_p.maxX);
+
+    header_win = newwin(HEADER_ROWS, snake_p.maxX, 0, 0);
+    footer_win = newwin(FOOTER_ROWS, snake_p.maxX, snake_p.maxY - FOOTER_ROWS, 0);
+    snake_win = newwin(snake_p.maxY - HEADER_ROWS- FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
+
     snake_p.x = snake_p.maxX / 2;
     snake_p.y = snake_p.maxY / 2;
 
     // Check if colors are supported
     if (!has_colors())
     {
-        delwin(mainwin);
+        delwin(header_win);
+        delwin(footer_win);
+        delwin(snake_win);
         endwin();
         fprintf(stderr,"Your terminal does not support color\n");
         exit(-1);
@@ -309,7 +323,7 @@ int main(int argc, char *argv[])
     // Tell curses not to do NL->CR/NL on output
     nonl();
     // Enable the keypad for non-char keys
-    keypad(mainwin, TRUE);
+    keypad(stdscr, TRUE);
 
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
     memset(snake_p.move_y, -1, sizeof snake_p.move_y);
@@ -319,20 +333,18 @@ int main(int argc, char *argv[])
 
     while(snake_p.ch != 'q')
     {
-        clear();
+        //print_header(header_win);
+        print_food(snake_win);
+        //print_footer(footer_win);
 
-        print_header();
-        print_food();
-        print_footer();
-
-        control_snake();
-
-        refresh();
+        //control_snake(snake_win);
     }
 
     pthread_join(thread_snake, NULL);
 
-    delwin(mainwin);
+    delwin(header_win);
+    delwin(footer_win);
+    delwin(snake_win);
     endwin();
     refresh();
 
