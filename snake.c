@@ -22,6 +22,8 @@ typedef struct snake_param
     int move_y[MAX_SNAKE_LENGTH];
     int maxX;
     int maxY;
+    int snake_maxX;
+    int snake_maxY;
     int moves;
     int length;
     unsigned int speed;
@@ -70,6 +72,7 @@ void *print_header(WINDOW *win)
     header_width += char_ret2;
 
     wrefresh(win);
+    usleep(10000);
 }
 
 void *print_footer(WINDOW *win)
@@ -100,6 +103,7 @@ void *print_footer(WINDOW *win)
     footer_width += char_ret4;
 
     wrefresh(win);
+    usleep(10000);
 }
 
 void *print_snake(WINDOW *win)
@@ -149,6 +153,7 @@ void *print_food(WINDOW *win)
     color_str(win, y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
 
     wrefresh(win);
+    usleep(1000);
 }
 
 void *control_snake(WINDOW *win)
@@ -275,9 +280,16 @@ int main(int argc, char *argv[])
     // Get the maximum size of the screen
     getmaxyx(stdscr, snake_p.maxY, snake_p.maxX);
 
+    // Create window for the header rows
     header_win = newwin(HEADER_ROWS, snake_p.maxX, 0, 0);
+
+    // Create window for the footer rows
     footer_win = newwin(FOOTER_ROWS, snake_p.maxX, snake_p.maxY - FOOTER_ROWS, 0);
+
+    // Create window for the snake game
     snake_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
+
+    getmaxyx(snake_win, snake_p.snake_maxY, snake_p.snake_maxX);
 
     snake_p.x = snake_p.maxX / 2;
     snake_p.y = snake_p.maxY / 2;
@@ -337,7 +349,10 @@ int main(int argc, char *argv[])
     while(snake_p.ch != 'q')
     {
         print_header(header_win);
+
         print_food(snake_win);
+        control_snake(snake_win);
+
         print_footer(footer_win);
 
         //control_snake(snake_win);
