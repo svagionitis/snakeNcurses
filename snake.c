@@ -71,8 +71,8 @@ void *print_header(WINDOW *win)
     mvwaddstr(win, 0, ++header_width, buf);
     header_width += char_ret2;
 
-    wrefresh(win);
-    usleep(10000);
+    //wrefresh(win);
+    wnoutrefresh(win);
 }
 
 void *print_footer(WINDOW *win)
@@ -102,12 +102,14 @@ void *print_footer(WINDOW *win)
     mvwaddstr(win, 0, ++footer_width, buf);
     footer_width += char_ret4;
 
-    wrefresh(win);
-    usleep(10000);
+    //wrefresh(win);
+    wnoutrefresh(win);
 }
 
 void *print_snake(WINDOW *win)
 {
+    wclear(win);
+
     for (int i = 0;i<snake_p.length;i++)
     {
         if (snake_p.moves - i >= 0)
@@ -130,6 +132,11 @@ void *print_snake(WINDOW *win)
         else
             color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
     }
+
+    box(win, '|', '-');
+    //wrefresh(win);
+    wnoutrefresh(win);
+    usleep(snake_p.speed);
 }
 
 void *print_food(WINDOW *win)
@@ -152,16 +159,16 @@ void *print_food(WINDOW *win)
 
     color_str(win, y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
 
-    wrefresh(win);
-    usleep(1000);
+    //wrefresh(win);
+    wnoutrefresh(win);
 }
 
-void *control_snake(WINDOW *win)
+void *control_snake(void *arg)
 {
+    WINDOW *win = (WINDOW *) arg;
+
     while(snake_p.ch != 'q')
     {
-        wclear(win);
-
         int last_char;
 
         // Get keyboard input non-blocking
@@ -171,8 +178,10 @@ void *control_snake(WINDOW *win)
         else if (snake_p.ch == 'q')
             break;
 
+#if 1
         if (snake_p.ch == KEY_UP || snake_p.ch == KEY_DOWN || snake_p.ch == KEY_LEFT || snake_p.ch == KEY_RIGHT)
             last_char = snake_p.ch;
+#endif
 
         // In thread with the sleep
         switch(snake_p.ch)
@@ -254,20 +263,14 @@ void *control_snake(WINDOW *win)
                 break;
         }
 
-        print_snake(win);
-
-        wrefresh(win);
-        usleep(snake_p.speed);
+    print_snake(win);
     }
 }
 
-void *threadfunc()
-{
-}
 
 int main(int argc, char *argv[])
 {
-    WINDOW *header_win, *footer_win, *snake_win;
+    WINDOW *header_win, *footer_win, *food_win, *snake_win;
     pthread_t thread_snake;
 
     memset(&snake_p, 0, sizeof snake_p);
@@ -286,8 +289,13 @@ int main(int argc, char *argv[])
     // Create window for the footer rows
     footer_win = newwin(FOOTER_ROWS, snake_p.maxX, snake_p.maxY - FOOTER_ROWS, 0);
 
+
+    // Window for food
+    food_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
+
     // Create window for the snake game
     snake_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
+
 
     getmaxyx(snake_win, snake_p.snake_maxY, snake_p.snake_maxX);
 
@@ -343,19 +351,18 @@ int main(int argc, char *argv[])
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
     memset(snake_p.move_y, -1, sizeof snake_p.move_y);
 
-    pthread_create(&thread_snake, NULL, threadfunc, NULL);
+    // Add snake in a separate thread
+    pthread_create(&thread_snake, NULL, control_snake, (void *) snake_win);
 
 
     while(snake_p.ch != 'q')
     {
         print_header(header_win);
-
-        print_food(snake_win);
-        control_snake(snake_win);
-
         print_footer(footer_win);
 
-        //control_snake(snake_win);
+        //print_food(food_win);
+
+        doupdate();
     }
 
     pthread_join(thread_snake, NULL);
