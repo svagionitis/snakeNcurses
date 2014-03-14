@@ -30,6 +30,7 @@ typedef struct snake_param
 } snake_param_t;
 
 snake_param_t snake_p;
+pthread_mutex_t lock_snake;
 
 int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const char * str)
 {
@@ -71,8 +72,8 @@ void *print_header(WINDOW *win)
     mvwaddstr(win, 0, ++header_width, buf);
     header_width += char_ret2;
 
-    //wrefresh(win);
-    wnoutrefresh(win);
+    wrefresh(win);
+    usleep(10000);
 }
 
 void *print_footer(WINDOW *win)
@@ -102,41 +103,47 @@ void *print_footer(WINDOW *win)
     mvwaddstr(win, 0, ++footer_width, buf);
     footer_width += char_ret4;
 
-    //wrefresh(win);
-    wnoutrefresh(win);
+    wrefresh(win);
+    usleep(10000);
 }
 
-void *print_snake(WINDOW *win)
+void *print_snake(void *arg)
 {
+    WINDOW *win = (WINDOW *) arg;
+
     wclear(win);
 
-    for (int i = 0;i<snake_p.length;i++)
+    while(snake_p.ch != 'q')
     {
-        if (snake_p.moves - i >= 0)
-        {
-            if (i == 0) // The head of snake
-            {
-                if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] < 0) // Up
-                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "^");
-                else if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] > 0) // Down
-                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "v");
 
-                if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] < 0) // Left
-                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "<");
-                else if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] > 0) // Right
-                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, ">");
+        wclear(win);
+
+        for (int i = 0;i<snake_p.length;i++)
+        {
+            if (snake_p.moves - i >= 0)
+            {
+                if (i == 0) // The head of snake
+                {
+                    if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] < 0) // Up
+                        color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "^");
+                    else if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] > 0) // Down
+                        color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "v");
+
+                    if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] < 0) // Left
+                        color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "<");
+                    else if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] > 0) // Right
+                        color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, ">");
+                }
+                else
+                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "#");
             }
             else
-                color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "#");
+                color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
         }
-        else
-            color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
-    }
 
-    box(win, '|', '-');
-    //wrefresh(win);
-    wnoutrefresh(win);
-    usleep(snake_p.speed);
+        wrefresh(win);
+        usleep(snake_p.speed);
+    }
 }
 
 void *print_food(WINDOW *win)
@@ -159,18 +166,15 @@ void *print_food(WINDOW *win)
 
     color_str(win, y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
 
-    //wrefresh(win);
-    wnoutrefresh(win);
+    wrefresh(win);
 }
 
-void *control_snake(void *arg)
+void *control_snake()
 {
-    WINDOW *win = (WINDOW *) arg;
+    int last_char = 0;
 
     while(snake_p.ch != 'q')
     {
-        int last_char;
-
         // Get keyboard input non-blocking
         snake_p.ch = getch();
         if (snake_p.ch == ERR)
@@ -178,7 +182,7 @@ void *control_snake(void *arg)
         else if (snake_p.ch == 'q')
             break;
 
-#if 1
+#if 0
         if (snake_p.ch == KEY_UP || snake_p.ch == KEY_DOWN || snake_p.ch == KEY_LEFT || snake_p.ch == KEY_RIGHT)
             last_char = snake_p.ch;
 #endif
@@ -262,8 +266,6 @@ void *control_snake(void *arg)
 
                 break;
         }
-
-    print_snake(win);
     }
 }
 
@@ -271,11 +273,11 @@ void *control_snake(void *arg)
 int main(int argc, char *argv[])
 {
     WINDOW *header_win, *footer_win, *food_win, *snake_win;
-    pthread_t thread_snake;
+    pthread_t thread_snake, thread_control;
 
     memset(&snake_p, 0, sizeof snake_p);
 
-    snake_p.length = 5;
+    snake_p.length = 7;
     snake_p.speed = 1000000;
 
     initscr();
@@ -351,9 +353,15 @@ int main(int argc, char *argv[])
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
     memset(snake_p.move_y, -1, sizeof snake_p.move_y);
 
-    // Add snake in a separate thread
-    pthread_create(&thread_snake, NULL, control_snake, (void *) snake_win);
+    if (pthread_mutex_init(&lock_snake, NULL) != 0)
+    {
+        fprintf(stderr, "Mutex init failed\n");
+        exit(-1);
+    }
 
+    // Add snake in a separate thread
+    pthread_create(&thread_control, NULL, control_snake, NULL);
+    pthread_create(&thread_snake, NULL, print_snake, (void *) snake_win);
 
     while(snake_p.ch != 'q')
     {
@@ -361,11 +369,12 @@ int main(int argc, char *argv[])
         print_footer(footer_win);
 
         //print_food(food_win);
-
-        doupdate();
     }
 
     pthread_join(thread_snake, NULL);
+    pthread_join(thread_control, NULL);
+    pthread_mutex_destroy(&lock_snake);
+
 
     delwin(header_win);
     delwin(footer_win);
