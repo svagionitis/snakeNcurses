@@ -143,6 +143,8 @@ void *print_snake(void *arg)
 
         wrefresh(win);
         usleep(snake_p.speed);
+
+        pthread_mutex_unlock(&lock_snake);
     }
 }
 
@@ -182,7 +184,7 @@ void *control_snake()
         else if (snake_p.ch == 'q')
             break;
 
-#if 0
+#if 1
         if (snake_p.ch == KEY_UP || snake_p.ch == KEY_DOWN || snake_p.ch == KEY_LEFT || snake_p.ch == KEY_RIGHT)
             last_char = snake_p.ch;
 #endif
@@ -266,6 +268,8 @@ void *control_snake()
 
                 break;
         }
+
+        pthread_mutex_lock(&lock_snake);
     }
 }
 
