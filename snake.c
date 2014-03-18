@@ -29,7 +29,18 @@ typedef struct snake_param
     unsigned int speed;
 } snake_param_t;
 
+typedef struct food_param
+{
+    int x;
+    int y;
+    int food_maxX;
+    int food_maxY;
+    int type;
+    int isFirst;
+} food_param_t;
+
 snake_param_t snake_p;
+food_param_t food_p;
 pthread_mutex_t lock_snake;
 
 int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const char * str)
@@ -107,6 +118,29 @@ void *print_footer(WINDOW *win)
     usleep(10000);
 }
 
+void *print_food(WINDOW *win)
+{
+    struct timeval t;
+
+    getmaxyx(win, food_p.food_maxY, food_p.food_maxX);
+
+    gettimeofday(&t, NULL);
+
+    // Seed microseconds
+    srand(t.tv_usec * t.tv_sec);
+
+    if (food_p.isFirst || (food_p.x == snake_p.x && food_p.y == snake_p.y))
+    {
+        // Get random range formula from http://c-faq.com/lib/randrange.html and http://stackoverflow.com/a/2509699
+        food_p.x = food_p.food_maxX * ((double)rand()/RAND_MAX);
+        food_p.y = food_p.food_maxY * ((double)rand()/RAND_MAX);
+
+        food_p.isFirst = 0;
+    }
+
+    color_str(win, food_p.y, food_p.x, COLOR_WHITE, COLOR_BLACK, "§");
+}
+
 void *print_snake(void *arg)
 {
     WINDOW *win = (WINDOW *) arg;
@@ -117,6 +151,8 @@ void *print_snake(void *arg)
     {
 
         wclear(win);
+
+        print_food(win);
 
         for (int i = 0;i<snake_p.length;i++)
         {
@@ -146,29 +182,6 @@ void *print_snake(void *arg)
 
         pthread_mutex_unlock(&lock_snake);
     }
-}
-
-void *print_food(WINDOW *win)
-{
-    struct timeval t;
-    int win_maxX, win_maxY;
-
-    getmaxyx(win, win_maxY, win_maxX);
-
-    wclear(win);
-
-    gettimeofday(&t, NULL);
-
-    // Seed microseconds
-    srand(t.tv_usec * t.tv_sec);
-
-    // Get random range formula from http://c-faq.com/lib/randrange.html and http://stackoverflow.com/a/2509699
-    int x_rand = win_maxX * ((double)rand()/RAND_MAX);
-    int y_rand = win_maxY * ((double)rand()/RAND_MAX);
-
-    color_str(win, y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
-
-    wrefresh(win);
 }
 
 void *control_snake()
@@ -280,6 +293,7 @@ int main(int argc, char *argv[])
     pthread_t thread_snake, thread_control;
 
     memset(&snake_p, 0, sizeof snake_p);
+    memset(&food_p, 0, sizeof food_p);
 
     snake_p.length = 7;
     snake_p.speed = 1000000;
@@ -295,9 +309,6 @@ int main(int argc, char *argv[])
     // Create window for the footer rows
     footer_win = newwin(FOOTER_ROWS, snake_p.maxX, snake_p.maxY - FOOTER_ROWS, 0);
 
-
-    // Window for food
-    food_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
 
     // Create window for the snake game
     snake_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
@@ -356,6 +367,8 @@ int main(int argc, char *argv[])
 
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
     memset(snake_p.move_y, -1, sizeof snake_p.move_y);
+
+    food_p.isFirst = 1;
 
     if (pthread_mutex_init(&lock_snake, NULL) != 0)
     {
