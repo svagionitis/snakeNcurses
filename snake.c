@@ -90,29 +90,50 @@ void *print_header(WINDOW *win)
 void *print_footer(WINDOW *win)
 {
     char buf[50];
+    int char_ret[8], i = 0;
     int footer_width = 0;
 
     wclear(win);
 
     memset(buf, '\0', sizeof buf);
-    int char_ret1 = snprintf(buf, sizeof buf, "x: %d", snake_p.x);
+    char_ret[i] = snprintf(buf, sizeof buf, "FOOD:");
     mvwaddstr(win, 0, 0, buf);
-    footer_width += char_ret1;
+    footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    int char_ret2 = snprintf(buf, sizeof buf, "y: %d", snake_p.y);
+    char_ret[i] = snprintf(buf, sizeof buf, "x: %d", food_p.x);
     mvwaddstr(win, 0, ++footer_width, buf);
-    footer_width += char_ret2;
+    footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    int char_ret3 = snprintf(buf, sizeof buf, "moves: %d", snake_p.moves);
+    char_ret[i] = snprintf(buf, sizeof buf, "y: %d", food_p.y);
     mvwaddstr(win, 0, ++footer_width, buf);
-    footer_width += char_ret3;
+    footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    int char_ret4 = snprintf(buf, sizeof buf, "speed: %u", snake_p.speed);
+    char_ret[i] = snprintf(buf, sizeof buf, "SNAKE:");
     mvwaddstr(win, 0, ++footer_width, buf);
-    footer_width += char_ret4;
+    footer_width += char_ret[i++];
+
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "x: %d", snake_p.x);
+    mvwaddstr(win, 0, ++footer_width, buf);
+    footer_width += char_ret[i++];
+
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "y: %d", snake_p.y);
+    mvwaddstr(win, 0, ++footer_width, buf);
+    footer_width += char_ret[i++];
+
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "moves: %d", snake_p.moves);
+    mvwaddstr(win, 0, ++footer_width, buf);
+    footer_width += char_ret[i++];
+
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "speed: %u", snake_p.speed);
+    mvwaddstr(win, 0, ++footer_width, buf);
+    footer_width += char_ret[i++];
 
     wrefresh(win);
     usleep(10000);
