@@ -13,6 +13,7 @@
 
 #define MAX_SNAKE_LENGTH 50
 
+// Snake parameters
 typedef struct snake_param
 {
     int ch;
@@ -29,6 +30,7 @@ typedef struct snake_param
     unsigned int speed;
 } snake_param_t;
 
+// Food parameters
 typedef struct food_param
 {
     int x;
@@ -150,6 +152,8 @@ void *print_food(WINDOW *win)
     // Seed microseconds
     srand(t.tv_usec * t.tv_sec);
 
+    // If food is called for first time or the head of snake has the same coordinates
+    // with the food, then calculate the new coordinates for food.
     if (food_p.isFirst || (food_p.x == snake_p.x && food_p.y == snake_p.y))
     {
         // Get random range formula from http://c-faq.com/lib/randrange.html and http://stackoverflow.com/a/2509699
@@ -219,6 +223,7 @@ void *control_snake()
             break;
 
 #if 1
+        // If arrow keys pressed ones, don't have to press it again.
         if (snake_p.ch == KEY_UP || snake_p.ch == KEY_DOWN || snake_p.ch == KEY_LEFT || snake_p.ch == KEY_RIGHT)
             last_char = snake_p.ch;
 #endif
