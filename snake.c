@@ -331,7 +331,7 @@ int main(int argc, char *argv[])
     memset(&snake_p, 0, sizeof snake_p);
     memset(&food_p, 0, sizeof food_p);
 
-    snake_p.length = 7;
+    snake_p.length = 2;
     snake_p.speed = 1000000;
 
     initscr();
