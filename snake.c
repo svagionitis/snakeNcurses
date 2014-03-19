@@ -355,6 +355,9 @@ int main(int argc, char *argv[])
     snake_p.x = snake_p.maxX / 2;
     snake_p.y = snake_p.maxY / 2;
 
+    snake_p.move_x[0] = snake_p.x;
+    snake_p.move_y[0] = snake_p.y;
+
     // Check if colors are supported
     if (!has_colors())
     {
@@ -401,9 +404,6 @@ int main(int argc, char *argv[])
     // Enable the keypad for non-char keys
     keypad(stdscr, TRUE);
 
-    memset(snake_p.move_x, -1, sizeof snake_p.move_x);
-    memset(snake_p.move_y, -1, sizeof snake_p.move_y);
-
     food_p.isFirst = 1;
 
     if (pthread_mutex_init(&lock_snake, NULL) != 0)
@@ -420,8 +420,6 @@ int main(int argc, char *argv[])
     {
         print_header(header_win);
         print_footer(footer_win);
-
-        //print_food(food_win);
     }
 
     pthread_join(thread_snake, NULL);
