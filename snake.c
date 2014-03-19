@@ -92,7 +92,7 @@ void *print_header(WINDOW *win)
 void *print_footer(WINDOW *win)
 {
     char buf[50];
-    int char_ret[8], i = 0;
+    int char_ret[9], i = 0;
     int footer_width = 0;
 
     wclear(win);
@@ -137,6 +137,11 @@ void *print_footer(WINDOW *win)
     mvwaddstr(win, 0, ++footer_width, buf);
     footer_width += char_ret[i++];
 
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "length: %u", snake_p.length);
+    mvwaddstr(win, 0, ++footer_width, buf);
+    footer_width += char_ret[i++];
+
     wrefresh(win);
     usleep(10000);
 }
@@ -153,7 +158,8 @@ void *print_food(WINDOW *win)
     srand(t.tv_usec * t.tv_sec);
 
     // If food is called for first time or the head of snake has the same coordinates
-    // with the food, then calculate the new coordinates for food.
+    // with the food, then calculate the new coordinates for food. Increase the length
+    // of the snake.
     if (food_p.isFirst || (food_p.x == snake_p.x && food_p.y == snake_p.y))
     {
         // Get random range formula from http://c-faq.com/lib/randrange.html and http://stackoverflow.com/a/2509699
@@ -161,6 +167,10 @@ void *print_food(WINDOW *win)
         food_p.y = food_p.food_maxY * ((double)rand()/RAND_MAX);
 
         food_p.isFirst = 0;
+
+        snake_p.length += 1;
+        if (snake_p.length >= MAX_SNAKE_LENGTH)
+            snake_p.length = MAX_SNAKE_LENGTH;
     }
 
     color_str(win, food_p.y, food_p.x, COLOR_WHITE, COLOR_BLACK, "§");
