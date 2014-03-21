@@ -21,6 +21,7 @@ typedef struct snake_param
     int y;
     int move_x[MAX_SNAKE_LENGTH];
     int move_y[MAX_SNAKE_LENGTH];
+    short color_fg[MAX_SNAKE_LENGTH];
     int maxX;
     int maxY;
     int snake_maxX;
@@ -192,20 +193,34 @@ void *print_snake(void *arg)
             {
                 if (i == 0) // The head of snake
                 {
+                    char * head;
+
                     if (snake_p.ch == KEY_UP)
-                        color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "^");
+                        head = "^";
                     else if (snake_p.ch == KEY_DOWN)
-                        color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "v");
+                        head = "v";
                     else if (snake_p.ch == KEY_LEFT)
-                        color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "<");
+                        head = "<";
                     else if (snake_p.ch == KEY_RIGHT)
-                        color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, ">");
+                        head = ">";
+
+                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, head);
                 }
                 else
-                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "#");
+                {
+                    if (snake_p.move_y[snake_p.moves - i] == snake_p.move_y[snake_p.moves] && snake_p.move_x[snake_p.moves - i] == snake_p.move_x[snake_p.moves])
+                        snake_p.color_fg[snake_p.moves - i] = COLOR_RED;
+
+                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, "#");
+                }
             }
             else
-                color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
+            {
+                if (snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_y[MAX_SNAKE_LENGTH + snake_p.moves] && snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_x[MAX_SNAKE_LENGTH + snake_p.moves])
+                    snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves] = COLOR_RED;
+
+                color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_BLACK, "~");
+            }
         }
 
         wrefresh(win);
@@ -331,34 +346,15 @@ int main(int argc, char *argv[])
     memset(&snake_p, 0, sizeof snake_p);
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
     memset(snake_p.move_y, -1, sizeof snake_p.move_y);
+    memset(snake_p.color_fg, COLOR_WHITE, sizeof snake_p.color_fg);
     memset(&food_p, 0, sizeof food_p);
 
-    snake_p.length = 2;
+    snake_p.length = 10;
     snake_p.speed = 1000000;
 
     food_p.isFirst = 1;
 
     initscr();
-
-    // Get the maximum size of the screen
-    getmaxyx(stdscr, snake_p.maxY, snake_p.maxX);
-
-    // Create window for the header rows
-    header_win = newwin(HEADER_ROWS, snake_p.maxX, 0, 0);
-
-    // Create window for the footer rows
-    footer_win = newwin(FOOTER_ROWS, snake_p.maxX, snake_p.maxY - FOOTER_ROWS, 0);
-
-
-    // Create window for the snake game
-    snake_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
-
-
-    getmaxyx(snake_win, snake_p.snake_maxY, snake_p.snake_maxX);
-
-    // Start snake from the middle of screen.
-    snake_p.x = snake_p.maxX / 2;
-    snake_p.y = snake_p.maxY / 2;
 
     // Check if colors are supported
     if (!has_colors())
@@ -385,6 +381,25 @@ int main(int argc, char *argv[])
                 init_pair(pair_count++, i, j);
     }
 
+    // Get the maximum size of the screen
+    getmaxyx(stdscr, snake_p.maxY, snake_p.maxX);
+
+    // Create window for the header rows
+    header_win = newwin(HEADER_ROWS, snake_p.maxX, 0, 0);
+
+    // Create window for the footer rows
+    footer_win = newwin(FOOTER_ROWS, snake_p.maxX, snake_p.maxY - FOOTER_ROWS, 0);
+
+
+    // Create window for the snake game
+    snake_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
+
+
+    getmaxyx(snake_win, snake_p.snake_maxY, snake_p.snake_maxX);
+
+    // Start snake from the middle of screen.
+    snake_p.x = snake_p.maxX / 2;
+    snake_p.y = snake_p.maxY / 2;
 
     clear();
 
