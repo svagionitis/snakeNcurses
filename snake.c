@@ -186,27 +186,27 @@ void *print_snake(void *arg)
 
         print_food(win);
 
-        for (int i = 0;i<snake_p.length;i++)
+        for (int i = 0;i < snake_p.length;i++)
         {
             if (snake_p.moves - i >= 0)
             {
                 if (i == 0) // The head of snake
                 {
-                    if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] < 0) // Up
-                        color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "^");
-                    else if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] > 0) // Down
-                        color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "v");
+                    if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves - 1] < 0) // Up
+                        color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "^");
+                    else if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves - 1] > 0) // Down
+                        color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "v");
 
-                    if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] < 0) // Left
-                        color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "<");
-                    else if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] > 0) // Right
-                        color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, ">");
+                    if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves - 1] < 0) // Left
+                        color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "<");
+                    else if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves - 1] > 0) // Right
+                        color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, ">");
                 }
                 else
-                    color_str(win, snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "#");
+                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "#");
             }
             else
-                color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
+                color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
         }
 
         wrefresh(win);
@@ -257,7 +257,7 @@ void *control_snake()
             case KEY_DOWN:
                 snake_p.y += 1;
 
-                if ( snake_p.y >= snake_p.maxY - FOOTER_ROWS)
+                if ( snake_p.y >= snake_p.maxY - FOOTER_ROWS - 1)
                     snake_p.y = 0 + HEADER_ROWS;
 
                 snake_p.moves++;
@@ -330,10 +330,14 @@ int main(int argc, char *argv[])
     pthread_t thread_snake, thread_control;
 
     memset(&snake_p, 0, sizeof snake_p);
+    memset(snake_p.move_x, -1, sizeof snake_p.move_x);
+    memset(snake_p.move_y, -1, sizeof snake_p.move_y);
     memset(&food_p, 0, sizeof food_p);
 
     snake_p.length = 2;
     snake_p.speed = 1000000;
+
+    food_p.isFirst = 1;
 
     initscr();
 
@@ -353,11 +357,9 @@ int main(int argc, char *argv[])
 
     getmaxyx(snake_win, snake_p.snake_maxY, snake_p.snake_maxX);
 
+    // Start snake from the middle of screen.
     snake_p.x = snake_p.maxX / 2;
     snake_p.y = snake_p.maxY / 2;
-
-    snake_p.move_x[0] = snake_p.x;
-    snake_p.move_y[0] = snake_p.y;
 
     // Check if colors are supported
     if (!has_colors())
@@ -404,8 +406,6 @@ int main(int argc, char *argv[])
     nonl();
     // Enable the keypad for non-char keys
     keypad(stdscr, TRUE);
-
-    food_p.isFirst = 1;
 
     if (pthread_mutex_init(&lock_snake, NULL) != 0)
     {
