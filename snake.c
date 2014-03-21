@@ -180,11 +180,8 @@ void *print_snake(void *arg)
 {
     WINDOW *win = (WINDOW *) arg;
 
-    wclear(win);
-
     while(snake_p.ch != 'q')
     {
-
         wclear(win);
 
         print_food(win);
@@ -217,6 +214,8 @@ void *print_snake(void *arg)
 
         pthread_mutex_unlock(&lock_snake);
     }
+
+    pthread_exit(0);
 }
 
 void *control_snake()
@@ -320,6 +319,8 @@ void *control_snake()
 
         pthread_mutex_lock(&lock_snake);
     }
+
+    pthread_exit(0);
 }
 
 
@@ -422,8 +423,8 @@ int main(int argc, char *argv[])
         print_footer(footer_win);
     }
 
-    pthread_join(thread_snake, NULL);
     pthread_join(thread_control, NULL);
+    pthread_join(thread_snake, NULL);
     pthread_mutex_destroy(&lock_snake);
 
 
@@ -431,7 +432,6 @@ int main(int argc, char *argv[])
     delwin(footer_win);
     delwin(snake_win);
     endwin();
-    refresh();
 
     return 0;
 }
