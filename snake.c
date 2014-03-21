@@ -192,14 +192,13 @@ void *print_snake(void *arg)
             {
                 if (i == 0) // The head of snake
                 {
-                    if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves - 1] < 0) // Up
+                    if (snake_p.ch == KEY_UP)
                         color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "^");
-                    else if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves - 1] > 0) // Down
+                    else if (snake_p.ch == KEY_DOWN)
                         color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "v");
-
-                    if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves - 1] < 0) // Left
+                    else if (snake_p.ch == KEY_LEFT)
                         color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, "<");
-                    else if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves - 1] > 0) // Right
+                    else if (snake_p.ch == KEY_RIGHT)
                         color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], COLOR_WHITE, COLOR_BLACK, ">");
                 }
                 else
