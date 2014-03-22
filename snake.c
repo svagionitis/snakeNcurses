@@ -46,7 +46,7 @@ snake_param_t snake_p;
 food_param_t food_p;
 pthread_mutex_t lock_snake;
 
-int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const char * str)
+int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const char *str)
 {
     short i;
     // Search all the pair of colors
@@ -61,11 +61,11 @@ int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const c
             break;
     }
 
-    attron(COLOR_PAIR(i));
+    wattron(win, COLOR_PAIR(i));
 
-    mvwaddstr(win, y,x,str);
+    mvwaddstr(win, y, x, str);
 
-    attroff(COLOR_PAIR(i));
+    wattroff(win, COLOR_PAIR(i));
     return 0;
 }
 
@@ -78,14 +78,15 @@ void *print_header(WINDOW *win)
 
     memset(buf, '\0', sizeof buf);
     int char_ret1 = snprintf(buf, sizeof buf, "Max Height: %d", snake_p.maxY);
-    mvwaddstr(win, 0, 0, buf);
+    color_str(win, 0, 0, 0, 0, buf);
     header_width += char_ret1;
 
     memset(buf, '\0', sizeof buf);
     int char_ret2 = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.maxX);
-    mvwaddstr(win, 0, ++header_width, buf);
+    color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret2;
 
+    refresh();
     wrefresh(win);
     usleep(10000);
 }
@@ -100,49 +101,50 @@ void *print_footer(WINDOW *win)
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "FOOD:");
-    mvwaddstr(win, 0, 0, buf);
+    color_str(win, 0, 0, 0, 0, buf);
     footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "x: %d", food_p.x);
-    mvwaddstr(win, 0, ++footer_width, buf);
+    color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "y: %d", food_p.y);
-    mvwaddstr(win, 0, ++footer_width, buf);
+    color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "SNAKE:");
-    mvwaddstr(win, 0, ++footer_width, buf);
+    color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "x: %d", snake_p.x);
-    mvwaddstr(win, 0, ++footer_width, buf);
+    color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "y: %d", snake_p.y);
-    mvwaddstr(win, 0, ++footer_width, buf);
+    color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "moves: %d", snake_p.moves);
-    mvwaddstr(win, 0, ++footer_width, buf);
+    color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "speed: %u", snake_p.speed);
-    mvwaddstr(win, 0, ++footer_width, buf);
+    color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "length: %u", snake_p.length);
-    mvwaddstr(win, 0, ++footer_width, buf);
+    color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
+    refresh();
     wrefresh(win);
     usleep(10000);
 }
@@ -174,7 +176,8 @@ void *print_food(WINDOW *win)
             snake_p.length = MAX_SNAKE_LENGTH;
     }
 
-    color_str(win, food_p.y, food_p.x, COLOR_WHITE, COLOR_BLACK, "§");
+    // Use default fg and bg color for food
+    color_str(win, food_p.y, food_p.x, 0, COLOR_BLACK, "§");
 }
 
 void *print_snake(void *arg)
@@ -193,7 +196,7 @@ void *print_snake(void *arg)
             {
                 if (i == 0) // The head of snake
                 {
-                    char * head;
+                    char *head;
 
                     if (snake_p.ch == KEY_UP)
                         head = "^";
@@ -208,21 +211,22 @@ void *print_snake(void *arg)
                 }
                 else
                 {
-                    if (snake_p.move_y[snake_p.moves - i] == snake_p.move_y[snake_p.moves] && snake_p.move_x[snake_p.moves - i] == snake_p.move_x[snake_p.moves])
-                        snake_p.color_fg[snake_p.moves - i] = COLOR_RED;
+                    //if (snake_p.move_y[snake_p.moves - i] == snake_p.move_y[snake_p.moves] && snake_p.move_x[snake_p.moves - i] == snake_p.move_x[snake_p.moves])
+                        //snake_p.color_fg[snake_p.moves - i] = COLOR_RED;
 
                     color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, "#");
                 }
             }
             else
             {
-                if (snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_y[MAX_SNAKE_LENGTH + snake_p.moves] && snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_x[MAX_SNAKE_LENGTH + snake_p.moves])
-                    snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves] = COLOR_RED;
+                //if (snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_y[MAX_SNAKE_LENGTH + snake_p.moves] && snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_x[MAX_SNAKE_LENGTH + snake_p.moves])
+                    //snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves] = COLOR_RED;
 
                 color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_BLACK, "~");
             }
         }
 
+        refresh();
         wrefresh(win);
         usleep(snake_p.speed);
 
@@ -346,7 +350,8 @@ int main(int argc, char *argv[])
     memset(&snake_p, 0, sizeof snake_p);
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
     memset(snake_p.move_y, -1, sizeof snake_p.move_y);
-    memset(snake_p.color_fg, COLOR_WHITE, sizeof snake_p.color_fg);
+    // Initialize color with the default fg
+    memset(snake_p.color_fg, 0, sizeof snake_p.color_fg);
     memset(&food_p, 0, sizeof food_p);
 
     snake_p.length = 10;
