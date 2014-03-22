@@ -86,9 +86,7 @@ void *print_header(WINDOW *win)
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret2;
 
-    refresh();
-    wrefresh(win);
-    usleep(10000);
+    wnoutrefresh(win);
 }
 
 void *print_footer(WINDOW *win)
@@ -144,9 +142,7 @@ void *print_footer(WINDOW *win)
     color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
-    refresh();
-    wrefresh(win);
-    usleep(10000);
+    wnoutrefresh(win);
 }
 
 void *print_food(WINDOW *win)
@@ -211,22 +207,25 @@ void *print_snake(void *arg)
                 }
                 else
                 {
-                    //if (snake_p.move_y[snake_p.moves - i] == snake_p.move_y[snake_p.moves] && snake_p.move_x[snake_p.moves - i] == snake_p.move_x[snake_p.moves])
-                        //snake_p.color_fg[snake_p.moves - i] = COLOR_RED;
+#if 0
+                    if (snake_p.move_y[snake_p.moves - i] == snake_p.move_y[snake_p.moves] && snake_p.move_x[snake_p.moves - i] == snake_p.move_x[snake_p.moves])
+                        snake_p.color_fg[snake_p.moves - i] = COLOR_RED;
+#endif
 
                     color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, "#");
                 }
             }
             else
             {
-                //if (snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_y[MAX_SNAKE_LENGTH + snake_p.moves] && snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_x[MAX_SNAKE_LENGTH + snake_p.moves])
-                    //snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves] = COLOR_RED;
+#if 0
+                if (snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_y[MAX_SNAKE_LENGTH + snake_p.moves] && snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_x[MAX_SNAKE_LENGTH + snake_p.moves])
+                    snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves] = COLOR_RED;
+#endif
 
                 color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_BLACK, "~");
             }
         }
 
-        refresh();
         wrefresh(win);
         usleep(snake_p.speed);
 
@@ -440,6 +439,8 @@ int main(int argc, char *argv[])
     {
         print_header(header_win);
         print_footer(footer_win);
+
+        doupdate();
     }
 
     pthread_join(thread_control, NULL);
