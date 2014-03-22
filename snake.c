@@ -343,7 +343,7 @@ void *control_snake()
 
 int main(int argc, char *argv[])
 {
-    WINDOW *header_win, *footer_win, *food_win, *snake_win;
+    WINDOW *header_win, *footer_win, *snake_win;
     pthread_t thread_snake, thread_control;
 
     memset(&snake_p, 0, sizeof snake_p);
