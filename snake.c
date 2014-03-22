@@ -226,7 +226,7 @@ void *print_snake(void *arg)
             }
         }
 
-        wrefresh(win);
+        wnoutrefresh(win);
         usleep(snake_p.speed);
 
         pthread_mutex_unlock(&lock_snake);
@@ -260,8 +260,8 @@ void *control_snake()
             case KEY_UP:
                 snake_p.y -= 1;
 
-                if (snake_p.y < 0 + HEADER_ROWS)
-                    snake_p.y = snake_p.maxY - FOOTER_ROWS - 1;
+                if (snake_p.y <= 0)
+                    snake_p.y = snake_p.snake_maxY;
 
                 snake_p.moves++;
                 if (snake_p.moves >= MAX_SNAKE_LENGTH)
@@ -274,8 +274,8 @@ void *control_snake()
             case KEY_DOWN:
                 snake_p.y += 1;
 
-                if ( snake_p.y >= snake_p.maxY - FOOTER_ROWS - 1)
-                    snake_p.y = 0 + HEADER_ROWS;
+                if ( snake_p.y >= snake_p.snake_maxY)
+                    snake_p.y = 0;
 
                 snake_p.moves++;
                 if (snake_p.moves >= MAX_SNAKE_LENGTH)
@@ -288,7 +288,7 @@ void *control_snake()
             case KEY_RIGHT:
                 snake_p.x += 1;
 
-                if (snake_p.x > snake_p.maxX)
+                if (snake_p.x >= snake_p.snake_maxX)
                     snake_p.x = 0;
 
                 snake_p.moves++;
@@ -302,8 +302,8 @@ void *control_snake()
             case KEY_LEFT:
                 snake_p.x -= 1;
 
-                if (snake_p.x < 0)
-                    snake_p.x = snake_p.maxX;
+                if (snake_p.x <= 0)
+                    snake_p.x = snake_p.snake_maxX;
 
                 snake_p.moves++;
                 if (snake_p.moves >= MAX_SNAKE_LENGTH)
@@ -363,9 +363,6 @@ int main(int argc, char *argv[])
     // Check if colors are supported
     if (!has_colors())
     {
-        delwin(header_win);
-        delwin(footer_win);
-        delwin(snake_win);
         endwin();
         fprintf(stderr,"Your terminal does not support color\n");
         exit(-1);
@@ -399,6 +396,7 @@ int main(int argc, char *argv[])
     snake_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
 
 
+    // Get the maximum size of the snake window
     getmaxyx(snake_win, snake_p.snake_maxY, snake_p.snake_maxX);
 
     // Start snake from the middle of screen.
