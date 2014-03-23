@@ -87,6 +87,8 @@ void *print_header(WINDOW *win)
     header_width += char_ret2;
 
     wnoutrefresh(win);
+
+    usleep(1000);
 }
 
 void *print_footer(WINDOW *win)
@@ -143,6 +145,8 @@ void *print_footer(WINDOW *win)
     footer_width += char_ret[i++];
 
     wnoutrefresh(win);
+
+    usleep(1000);
 }
 
 void *print_food(WINDOW *win)
