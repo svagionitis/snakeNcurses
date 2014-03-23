@@ -45,6 +45,7 @@ typedef struct food_param
 snake_param_t snake_p;
 food_param_t food_p;
 pthread_mutex_t lock_snake;
+pthread_mutex_t lock_print;
 
 int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const char *str)
 {
@@ -228,21 +229,19 @@ void *print_snake(void *arg)
                 }
                 else
                 {
-#if 0
+#if 1
                     if (snake_p.move_y[snake_p.moves - i] == snake_p.move_y[snake_p.moves] && snake_p.move_x[snake_p.moves - i] == snake_p.move_x[snake_p.moves])
                         snake_p.color_fg[snake_p.moves - i] = COLOR_RED;
 #endif
 
                     color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, "#");
+
+                    snake_p.color_fg[snake_p.moves - i] = 0;
+
                 }
             }
             else
             {
-#if 0
-                if (snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_y[MAX_SNAKE_LENGTH + snake_p.moves] && snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves] == snake_p.move_x[MAX_SNAKE_LENGTH + snake_p.moves])
-                    snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves] = COLOR_RED;
-#endif
-
                 color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_BLACK, "~");
             }
         }
@@ -445,6 +444,12 @@ int main(int argc, char *argv[])
     keypad(stdscr, TRUE);
 
     if (pthread_mutex_init(&lock_snake, NULL) != 0)
+    {
+        fprintf(stderr, "Mutex init failed\n");
+        exit(-1);
+    }
+
+    if (pthread_mutex_init(&lock_print, NULL) != 0)
     {
         fprintf(stderr, "Mutex init failed\n");
         exit(-1);
