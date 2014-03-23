@@ -72,23 +72,42 @@ int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const c
 void *print_header(WINDOW *win)
 {
     char buf[50];
+    int char_ret[7], i = 0;
     int header_width = 0;
 
     wclear(win);
 
     memset(buf, '\0', sizeof buf);
-    int char_ret1 = snprintf(buf, sizeof buf, "Max Height: %d", snake_p.maxY);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Height: %d", snake_p.maxY);
     color_str(win, 0, 0, 0, 0, buf);
-    header_width += char_ret1;
+    header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    int char_ret2 = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.maxX);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.maxX);
     color_str(win, 0, ++header_width, 0, 0, buf);
-    header_width += char_ret2;
+    header_width += char_ret[i++];
+
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "SNAKE: Max Height: %d", snake_p.snake_maxY);
+    color_str(win, 0, ++header_width, 0, 0, buf);
+    header_width += char_ret[i++];
+
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.snake_maxX);
+    color_str(win, 0, ++header_width, 0, 0, buf);
+    header_width += char_ret[i++];
+
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "FOOD: Max Height: %d", food_p.food_maxY);
+    color_str(win, 0, ++header_width, 0, 0, buf);
+    header_width += char_ret[i++];
+
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", food_p.food_maxX);
+    color_str(win, 0, ++header_width, 0, 0, buf);
+    header_width += char_ret[i++];
 
     wnoutrefresh(win);
-
-    usleep(1000);
 }
 
 void *print_footer(WINDOW *win)
@@ -145,8 +164,6 @@ void *print_footer(WINDOW *win)
     footer_width += char_ret[i++];
 
     wnoutrefresh(win);
-
-    usleep(1000);
 }
 
 void *print_food(WINDOW *win)
@@ -397,7 +414,7 @@ int main(int argc, char *argv[])
 
 
     // Create window for the snake game
-    snake_win = newwin(snake_p.maxY - HEADER_ROWS - FOOTER_ROWS, snake_p.maxX, HEADER_ROWS, 0);
+    snake_win = newwin(snake_p.maxY - (HEADER_ROWS - 1) - (FOOTER_ROWS - 1), snake_p.maxX, HEADER_ROWS - 1, 0);
 
 
     // Get the maximum size of the snake window
@@ -443,6 +460,8 @@ int main(int argc, char *argv[])
         print_footer(footer_win);
 
         doupdate();
+
+        usleep(10000);
     }
 
     pthread_join(thread_control, NULL);
