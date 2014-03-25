@@ -54,7 +54,7 @@ int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const c
     // to match with the given one.
     // Then apply the specific pair.
     // Naive way
-    for (i = 1;i < COLOR_PAIRS;i++)
+    for (i = 0;i < COLOR_PAIRS;i++)
     {
         short f, b;
         pair_content(i, &f, &b);
