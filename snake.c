@@ -217,6 +217,8 @@ void *print_snake(void *arg)
 
         for (int i = 0;i < snake_p.length;i++)
         {
+            char *body;
+
             if (snake_p.moves - i >= 0)
             {
                 if (i == 0) // The head of snake
@@ -224,13 +226,25 @@ void *print_snake(void *arg)
                     char *head;
 
                     if (snake_p.ch == KEY_UP)
+                    {
                         head = "^";
+                        body = "~";
+                    }
                     else if (snake_p.ch == KEY_DOWN)
+                    {
                         head = "v";
+                        body = "~";
+                    }
                     else if (snake_p.ch == KEY_LEFT)
+                    {
                         head = "<";
+                        body = "~";
+                    }
                     else if (snake_p.ch == KEY_RIGHT)
+                    {
                         head = ">";
+                        body = "~";
+                    }
 
                     color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, head);
                 }
@@ -241,7 +255,7 @@ void *print_snake(void *arg)
                         snake_p.color_fg[snake_p.moves - i] = COLOR_RED;
 #endif
 
-                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, "#");
+                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, body);
 
                     snake_p.color_fg[snake_p.moves - i] = 0;
 
@@ -249,7 +263,7 @@ void *print_snake(void *arg)
             }
             else
             {
-                color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_BLACK, "~");
+                color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_BLACK, body);
             }
         }
 
