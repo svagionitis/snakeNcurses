@@ -22,10 +22,10 @@ typedef struct snake_param
     int move_x[MAX_SNAKE_LENGTH];
     int move_y[MAX_SNAKE_LENGTH];
     short color_fg[MAX_SNAKE_LENGTH];
-    int maxX;
-    int maxY;
-    int snake_maxX;
-    int snake_maxY;
+    int width;
+    int height;
+    int snake_width;
+    int snake_height;
     int moves;
     int length;
     unsigned int speed;
@@ -36,11 +36,12 @@ typedef struct food_param
 {
     int x;
     int y;
-    int food_maxX;
-    int food_maxY;
+    int food_width;
+    int food_height;
     int type;
     int isFirst;
 } food_param_t;
+
 
 snake_param_t snake_p;
 food_param_t food_p;
@@ -79,32 +80,32 @@ void *print_header(WINDOW *win)
     wclear(win);
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "Max Height: %d", snake_p.maxY);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Height: %d", snake_p.height);
     color_str(win, 0, 0, 0, 0, buf);
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.maxX);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.width);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "SNAKE: Max Height: %d", snake_p.snake_maxY);
+    char_ret[i] = snprintf(buf, sizeof buf, "SNAKE: Max Height: %d", snake_p.snake_height);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.snake_maxX);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.snake_width);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "FOOD: Max Height: %d", food_p.food_maxY);
+    char_ret[i] = snprintf(buf, sizeof buf, "FOOD: Max Height: %d", food_p.food_height);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", food_p.food_maxX);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", food_p.food_width);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
@@ -171,7 +172,7 @@ void *print_food(WINDOW *win)
 {
     struct timeval t;
 
-    getmaxyx(win, food_p.food_maxY, food_p.food_maxX);
+    getmaxyx(win, food_p.food_height, food_p.food_width);
 
     gettimeofday(&t, NULL);
 
@@ -184,8 +185,8 @@ void *print_food(WINDOW *win)
     if (food_p.isFirst || (food_p.x == snake_p.x && food_p.y == snake_p.y))
     {
         // Get random range formula from http://c-faq.com/lib/randrange.html and http://stackoverflow.com/a/2509699
-        food_p.x = food_p.food_maxX * ((double)rand()/RAND_MAX);
-        food_p.y = food_p.food_maxY * ((double)rand()/RAND_MAX);
+        food_p.x = food_p.food_width * ((double)rand()/RAND_MAX);
+        food_p.y = food_p.food_height * ((double)rand()/RAND_MAX);
 
         food_p.isFirst = 0;
 
@@ -207,6 +208,10 @@ void *print_snake(void *arg)
         wclear(win);
 
         print_food(win);
+
+        // Get the max snake window size because the window could be 
+        // resized and we want to update it.
+        getmaxyx(win, snake_p.snake_height, snake_p.snake_width);
 
         for (int i = 0;i < snake_p.length;i++)
         {
@@ -281,7 +286,7 @@ void *control_snake()
                 snake_p.y -= 1;
 
                 if (snake_p.y <= 0)
-                    snake_p.y = snake_p.snake_maxY;
+                    snake_p.y = snake_p.snake_height;
 
                 snake_p.moves++;
                 if (snake_p.moves >= MAX_SNAKE_LENGTH)
@@ -294,7 +299,7 @@ void *control_snake()
             case KEY_DOWN:
                 snake_p.y += 1;
 
-                if ( snake_p.y >= snake_p.snake_maxY)
+                if ( snake_p.y >= snake_p.snake_height)
                     snake_p.y = 0;
 
                 snake_p.moves++;
@@ -308,7 +313,7 @@ void *control_snake()
             case KEY_RIGHT:
                 snake_p.x += 1;
 
-                if (snake_p.x >= snake_p.snake_maxX)
+                if (snake_p.x >= snake_p.snake_width)
                     snake_p.x = 0;
 
                 snake_p.moves++;
@@ -323,7 +328,7 @@ void *control_snake()
                 snake_p.x -= 1;
 
                 if (snake_p.x <= 0)
-                    snake_p.x = snake_p.snake_maxX;
+                    snake_p.x = snake_p.snake_width;
 
                 snake_p.moves++;
                 if (snake_p.moves >= MAX_SNAKE_LENGTH)
@@ -403,25 +408,26 @@ int main(int argc, char *argv[])
     }
 
     // Get the maximum size of the screen
-    getmaxyx(stdscr, snake_p.maxY, snake_p.maxX);
+    getmaxyx(stdscr, snake_p.height, snake_p.width);
 
     // Create window for the header rows
-    header_win = newwin(HEADER_ROWS, snake_p.maxX, 0, 0);
+    header_win = newwin(HEADER_ROWS, snake_p.width, 0, 0);
 
     // Create window for the footer rows
-    footer_win = newwin(FOOTER_ROWS, snake_p.maxX, snake_p.maxY - FOOTER_ROWS, 0);
+    footer_win = newwin(FOOTER_ROWS, snake_p.width, snake_p.height - FOOTER_ROWS, 0);
 
 
     // Create window for the snake game
-    snake_win = newwin(snake_p.maxY - (HEADER_ROWS - 1) - (FOOTER_ROWS - 1), snake_p.maxX, HEADER_ROWS - 1, 0);
-
+    snake_win = newwin(snake_p.height - HEADER_ROWS - FOOTER_ROWS, snake_p.width, HEADER_ROWS, 0);
+    box(snake_win, '*', '*');
 
     // Get the maximum size of the snake window
-    getmaxyx(snake_win, snake_p.snake_maxY, snake_p.snake_maxX);
+    getmaxyx(snake_win, snake_p.snake_height, snake_p.snake_width);
+    getmaxyx(snake_win, food_p.food_height, food_p.food_width);
 
     // Start snake from the middle of screen.
-    snake_p.x = snake_p.maxX / 2;
-    snake_p.y = snake_p.maxY / 2;
+    snake_p.x = snake_p.width / 2;
+    snake_p.y = snake_p.height / 2;
 
     clear();
 
@@ -461,6 +467,9 @@ int main(int argc, char *argv[])
 
     while(snake_p.ch != 'q')
     {
+        // The window might resize, so update the size.
+        getmaxyx(stdscr, snake_p.height, snake_p.width);
+
         print_header(header_win);
         print_footer(footer_win);
 
