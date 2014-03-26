@@ -42,7 +42,8 @@ typedef struct food_param
     int isFirst;
 } food_param_t;
 
-
+// Global variables
+WINDOW *header_win, *footer_win, *snake_win;
 snake_param_t snake_p;
 food_param_t food_p;
 pthread_mutex_t lock_snake;
@@ -365,10 +366,21 @@ void *control_snake()
     pthread_exit(0);
 }
 
+void resize_all(int sig)
+{
+    getmaxyx(stdscr, snake_p.height, snake_p.width);
+
+    resizeterm(snake_p.height, snake_p.width);
+
+#if 0
+    wresize(header_win, HEADER_ROWS, snake_p.width);
+    wresize(footer_win, FOOTER_ROWS, snake_p.width);
+    wresize(snake_win, snake_p.height - HEADER_ROWS - FOOTER_ROWS, snake_p.width);
+#endif
+}
 
 int main(int argc, char *argv[])
 {
-    WINDOW *header_win, *footer_win, *snake_win;
     pthread_t thread_snake, thread_control;
 
     memset(&snake_p, 0, sizeof snake_p);
@@ -382,6 +394,9 @@ int main(int argc, char *argv[])
     snake_p.speed = 1000000;
 
     food_p.isFirst = 1;
+
+    // Catch resize signal
+    signal(SIGWINCH, resize_all);
 
     initscr();
 
@@ -467,9 +482,6 @@ int main(int argc, char *argv[])
 
     while(snake_p.ch != 'q')
     {
-        // The window might resize, so update the size.
-        getmaxyx(stdscr, snake_p.height, snake_p.width);
-
         print_header(header_win);
         print_footer(footer_win);
 
