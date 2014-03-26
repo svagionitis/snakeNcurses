@@ -7,6 +7,7 @@
 #include <sys/time.h>
 #include <curses.h>
 #include <pthread.h>
+#include <signal.h>
 
 #define HEADER_ROWS 1
 #define FOOTER_ROWS 1
@@ -252,7 +253,7 @@ void *print_snake(void *arg)
             }
         }
 
-        box(win, 0, 0);
+        wborder(win, '|', '|', '-', '-', '+', '+', '+', '+');
         wnoutrefresh(win);
         usleep(snake_p.speed);
 
