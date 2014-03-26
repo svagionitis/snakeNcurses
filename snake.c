@@ -252,6 +252,7 @@ void *print_snake(void *arg)
             }
         }
 
+        box(win, 0, 0);
         wnoutrefresh(win);
         usleep(snake_p.speed);
 
@@ -434,7 +435,6 @@ int main(int argc, char *argv[])
 
     // Create window for the snake game
     snake_win = newwin(snake_p.height - HEADER_ROWS - FOOTER_ROWS, snake_p.width, HEADER_ROWS, 0);
-    box(snake_win, '*', '*');
 
     // Get the maximum size of the snake window
     getmaxyx(snake_win, snake_p.snake_height, snake_p.snake_width);
