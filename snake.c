@@ -1,4 +1,4 @@
-/*Build: gcc -D_BSD_SOURCE -std=c99 -o snake snake.c -lncurses -lpthread*/
+/*Build: gcc -D_BSD_SOURCE -std=c99 -o snake snake.c -lncurses -lpthread -Wall -W -O2*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -48,7 +48,6 @@ WINDOW *header_win, *footer_win, *snake_win;
 snake_param_t snake_p;
 food_param_t food_p;
 pthread_mutex_t lock_snake;
-pthread_mutex_t lock_print;
 
 int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const char *str)
 {
@@ -73,7 +72,7 @@ int color_str(WINDOW *win, int y, int x, short fg_color, short bg_color, const c
     return 0;
 }
 
-void *print_header(WINDOW *win)
+void print_header(WINDOW *win)
 {
     char buf[50];
     int char_ret[7], i = 0;
@@ -114,7 +113,7 @@ void *print_header(WINDOW *win)
     wnoutrefresh(win);
 }
 
-void *print_footer(WINDOW *win)
+void print_footer(WINDOW *win)
 {
     char buf[50];
     int char_ret[9], i = 0;
@@ -170,7 +169,7 @@ void *print_footer(WINDOW *win)
     wnoutrefresh(win);
 }
 
-void *print_food(WINDOW *win)
+void print_food(WINDOW *win)
 {
     struct timeval t;
 
@@ -215,15 +214,15 @@ void *print_snake(void *arg)
         // resized and we want to update it.
         getmaxyx(win, snake_p.snake_height, snake_p.snake_width);
 
+        char *body = NULL;
+
         for (int i = 0;i < snake_p.length;i++)
         {
-            char *body;
-
             if (snake_p.moves - i >= 0)
             {
                 if (i == 0) // The head of snake
                 {
-                    char *head;
+                    char *head = NULL;
 
                     if (snake_p.ch == KEY_UP)
                     {
@@ -384,6 +383,8 @@ void *control_snake()
 
 void resize_all(int sig)
 {
+    fprintf(stderr, "sig: %d\n", sig);
+
     getmaxyx(stdscr, snake_p.height, snake_p.width);
 
     resizeterm(snake_p.height, snake_p.width);
@@ -398,6 +399,12 @@ void resize_all(int sig)
 int main(int argc, char *argv[])
 {
     pthread_t thread_snake, thread_control;
+
+    if (argc != 1)
+    {
+        printf("Usage: %s\n", argv[0]);
+        return -1;
+    }
 
     memset(&snake_p, 0, sizeof snake_p);
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
@@ -421,7 +428,7 @@ int main(int argc, char *argv[])
     {
         endwin();
         fprintf(stderr,"Your terminal does not support color\n");
-        exit(-1);
+        return -1;
     }
     else
     {
@@ -482,13 +489,7 @@ int main(int argc, char *argv[])
     if (pthread_mutex_init(&lock_snake, NULL) != 0)
     {
         fprintf(stderr, "Mutex init failed\n");
-        exit(-1);
-    }
-
-    if (pthread_mutex_init(&lock_print, NULL) != 0)
-    {
-        fprintf(stderr, "Mutex init failed\n");
-        exit(-1);
+        return -1;
     }
 
     // Add snake in a separate thread
