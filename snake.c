@@ -349,8 +349,16 @@ void *control_snake()
             case KEY_RIGHT:
                 snake_p.x += 1;
 
-                if (snake_p.x >= snake_p.snake_width)
-                    snake_p.x = 0;
+                if (set_border)
+                {
+                    if (snake_p.x >= snake_p.snake_width - 2)
+                        snake_p.x = 1;
+                }
+                else
+                {
+                    if (snake_p.x >= snake_p.snake_width - 1)
+                        snake_p.x = 0;
+                }
 
                 snake_p.moves++;
                 if (snake_p.moves >= MAX_SNAKE_LENGTH)
@@ -363,8 +371,16 @@ void *control_snake()
             case KEY_LEFT:
                 snake_p.x -= 1;
 
-                if (snake_p.x <= 0)
-                    snake_p.x = snake_p.snake_width;
+                if (set_border)
+                {
+                    if (snake_p.x <= 1)
+                        snake_p.x = snake_p.snake_width - 2;
+                }
+                else
+                {
+                    if (snake_p.x <= 0)
+                        snake_p.x = snake_p.snake_width - 1;
+                }
 
                 snake_p.moves++;
                 if (snake_p.moves >= MAX_SNAKE_LENGTH)
