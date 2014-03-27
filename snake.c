@@ -43,6 +43,8 @@ typedef struct food_param
     int isFirst;
 } food_param_t;
 
+char set_border = FALSE;
+
 // Global variables
 WINDOW *header_win, *footer_win, *snake_win;
 snake_param_t snake_p;
@@ -266,7 +268,9 @@ void *print_snake(void *arg)
             }
         }
 
-        wborder(win, '|', '|', '-', '-', '+', '+', '+', '+');
+        if (set_border)
+            wborder(win, '|', '|', '-', '_', '+', '+', '+', '+');
+
         wnoutrefresh(win);
         usleep(snake_p.speed);
 
@@ -301,8 +305,16 @@ void *control_snake()
             case KEY_UP:
                 snake_p.y -= 1;
 
-                if (snake_p.y <= 0)
-                    snake_p.y = snake_p.snake_height;
+                if (set_border)
+                {
+                    if (snake_p.y <= 0)
+                        snake_p.y = snake_p.snake_height - 1;
+                }
+                else
+                {
+                    if (snake_p.y <= -1)
+                        snake_p.y = snake_p.snake_height;
+                }
 
                 snake_p.moves++;
                 if (snake_p.moves >= MAX_SNAKE_LENGTH)
@@ -315,8 +327,16 @@ void *control_snake()
             case KEY_DOWN:
                 snake_p.y += 1;
 
-                if ( snake_p.y >= snake_p.snake_height)
-                    snake_p.y = 0;
+                if (set_border)
+                {
+                    if (snake_p.y >= snake_p.snake_height - 1)
+                        snake_p.y = 1;
+                }
+                else
+                {
+                    if (snake_p.y >= snake_p.snake_height)
+                        snake_p.y = 0;
+                }
 
                 snake_p.moves++;
                 if (snake_p.moves >= MAX_SNAKE_LENGTH)
@@ -371,6 +391,17 @@ void *control_snake()
 
                 if (snake_p.speed < 1)
                     snake_p.speed = 1;
+
+                break;
+            case 'b':
+                if (set_border)
+                {
+                    set_border = FALSE;
+                }
+                else
+                {
+                    set_border = TRUE;
+                }
 
                 break;
         }
