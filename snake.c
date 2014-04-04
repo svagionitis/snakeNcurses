@@ -36,7 +36,7 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
     // to match with the given one.
     // Then apply the specific pair.
     // Naive way
-    for (i = 1;i < COLOR_PAIRS;i++)
+    for (i = 0;i < COLOR_PAIRS;i++)
     {
         short f, b;
         pair_content(i, &f, &b);
@@ -103,20 +103,20 @@ void print_snake()
             if (i == 0) // The head of snake
             {
                 if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] < 0) // Up
-                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "^");
+                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], 0, COLOR_BLACK, "^");
                 else if (snake_p.move_y[snake_p.moves] - snake_p.move_y[snake_p.moves-1] > 0) // Down
-                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "v");
+                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], 0, COLOR_BLACK, "v");
 
                 if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] < 0) // Left
-                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "<");
+                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], 0, COLOR_BLACK, "<");
                 else if (snake_p.move_x[snake_p.moves] - snake_p.move_x[snake_p.moves-1] > 0) // Right
-                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, ">");
+                    color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], 0, COLOR_BLACK, ">");
             }
             else
-                color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], COLOR_WHITE, COLOR_BLACK, "#");
+                color_str(snake_p.move_y[snake_p.moves-i], snake_p.move_x[snake_p.moves-i], 0, COLOR_BLACK, "#");
         }
         else
-            color_str(snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], COLOR_WHITE, COLOR_BLACK, "#");
+            color_str(snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], 0, COLOR_BLACK, "#");
     }
 }
 
@@ -133,7 +133,7 @@ void print_food()
     int x_rand = ((snake_p.maxX - 1) + 1) * ((double)rand()/RAND_MAX);
     int y_rand = ((((snake_p.maxY - 1) - FOOTER_ROWS) - HEADER_ROWS + 1) * ((double)rand()/RAND_MAX)) + HEADER_ROWS;
 
-    color_str(y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
+    color_str(y_rand, x_rand, 0, COLOR_BLACK, "§");
 }
 
 void control_snake()
