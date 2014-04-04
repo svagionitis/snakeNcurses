@@ -117,6 +117,8 @@ void print_snake()
         else
             color_str(snake_p.move_y[MAX_SNAKE_LENGTH-i+snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH-i+snake_p.moves], 0, COLOR_BLACK, "#");
     }
+
+    usleep(snake_p.speed);
 }
 
 void print_food()
@@ -133,14 +135,13 @@ void print_food()
     int y_rand = ((((snake_p.maxY - 1) - FOOTER_ROWS) - HEADER_ROWS + 1) * ((double)rand()/RAND_MAX)) + HEADER_ROWS;
 
     color_str(y_rand, x_rand, 0, COLOR_BLACK, "§");
+
 }
 
 void control_snake()
 {
     while(snake_p.ch != 'q')
     {
-        clear();
-
         int last_char;
 
         // Get keyboard input non-blocking
@@ -234,16 +235,12 @@ void control_snake()
         }
 
         print_snake();
-
-        refresh();
-        usleep(snake_p.speed);
     }
 }
 
 
 int main(int argc, char *argv[])
 {
-    WINDOW *mainwin;
 
     if (argc != 1)
     {
@@ -256,22 +253,17 @@ int main(int argc, char *argv[])
     snake_p.length = 5;
     snake_p.speed = 1000000;
 
-    mainwin = initscr();
-    if (mainwin == NULL)
-    {
-        fprintf(stderr, "Error initialising ncurses.\n");
-        exit(-1);
-    }
+    initscr();
 
     // Get the maximum size of the screen
-    getmaxyx(mainwin, snake_p.maxY, snake_p.maxX);
+    getmaxyx(stdscr, snake_p.maxY, snake_p.maxX);
     snake_p.x = snake_p.maxX / 2;
     snake_p.y = snake_p.maxY / 2;
 
     // Check if colors are supported
     if (!has_colors())
     {
-        delwin(mainwin);
+        delwin(stdscr);
         endwin();
         fprintf(stderr,"Your terminal does not support color\n");
         exit(-1);
@@ -310,7 +302,7 @@ int main(int argc, char *argv[])
     // Tell curses not to do NL->CR/NL on output
     nonl();
     // Enable the keypad for non-char keys
-    keypad(mainwin, TRUE);
+    keypad(stdscr, TRUE);
 
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
     memset(snake_p.move_y, -1, sizeof snake_p.move_y);
@@ -333,7 +325,7 @@ int main(int argc, char *argv[])
 
     //pthread_join(thread_snake, NULL);
 
-    delwin(mainwin);
+    delwin(stdscr);
     endwin();
     refresh();
 
