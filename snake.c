@@ -52,7 +52,7 @@ int color_str(int y, int x, short fg_color, short bg_color, const char * str)
     return 0;
 }
 
-void *print_header()
+void print_header()
 {
     char buf[50];
     int header_width = 0;
@@ -68,7 +68,7 @@ void *print_header()
     header_width += char_ret2;
 }
 
-void *print_footer()
+void print_footer()
 {
     char buf[50];
     int footer_width = 0;
@@ -94,7 +94,7 @@ void *print_footer()
     footer_width += char_ret4;
 }
 
-void *print_snake()
+void print_snake()
 {
     for (int i = 0;i<snake_p.length;i++)
     {
@@ -120,7 +120,7 @@ void *print_snake()
     }
 }
 
-void *print_food()
+void print_food()
 {
     struct timeval t;
 
@@ -136,7 +136,7 @@ void *print_food()
     color_str(y_rand, x_rand, COLOR_WHITE, COLOR_BLACK, "§");
 }
 
-void *control_snake()
+void control_snake()
 {
     while(snake_p.ch != 'q')
     {
@@ -241,14 +241,16 @@ void *control_snake()
     }
 }
 
-void *threadfunc()
-{
-}
 
 int main(int argc, char *argv[])
 {
     WINDOW *mainwin;
-    pthread_t thread_snake;
+
+    if (argc != 1)
+    {
+        printf("Usage: %s\n", argv[0]);
+        return -1;
+    }
 
     memset(&snake_p, 0, sizeof snake_p);
 
@@ -314,7 +316,7 @@ int main(int argc, char *argv[])
     memset(snake_p.move_x, -1, sizeof snake_p.move_x);
     memset(snake_p.move_y, -1, sizeof snake_p.move_y);
 
-    pthread_create(&thread_snake, NULL, threadfunc, NULL);
+    //pthread_create(&thread_snake, NULL, threadfunc, NULL);
 
 
     while(snake_p.ch != 'q')
@@ -330,7 +332,7 @@ int main(int argc, char *argv[])
         refresh();
     }
 
-    pthread_join(thread_snake, NULL);
+    //pthread_join(thread_snake, NULL);
 
     delwin(mainwin);
     endwin();
