@@ -1,6 +1,11 @@
 #include <string.h>
 #include "header.h"
 #include "utils.h"
+#include "snake.h"
+#include "food.h"
+
+extern snake_param_t snake_p;
+extern food_param_t food_p;
 
 void print_header(WINDOW *win)
 {
@@ -31,12 +36,12 @@ void print_header(WINDOW *win)
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "FOOD: Max Height: "/*, food_p.food_height*/);
+    char_ret[i] = snprintf(buf, sizeof buf, "FOOD: Max Height: %d", food_p.food_height);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: "/*, food_p.food_width*/);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", food_p.food_width);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
