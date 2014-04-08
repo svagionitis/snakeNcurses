@@ -229,22 +229,22 @@ void *print_snake(void *arg)
                     if (snake_p.ch == KEY_UP)
                     {
                         head = "^";
-                        body = "~";
+                        body = "@";
                     }
                     else if (snake_p.ch == KEY_DOWN)
                     {
                         head = "v";
-                        body = "~";
+                        body = "@";
                     }
                     else if (snake_p.ch == KEY_LEFT)
                     {
                         head = "<";
-                        body = "~";
+                        body = "@";
                     }
                     else if (snake_p.ch == KEY_RIGHT)
                     {
                         head = ">";
-                        body = "~";
+                        body = "@";
                     }
 
                     color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, head);
