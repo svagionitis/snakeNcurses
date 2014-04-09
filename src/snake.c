@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <pthread.h>
 #include "utils.h"
 #include "food.h"
@@ -52,7 +53,6 @@ void *print_snake(void *arg)
                     }
 
                     color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, head);
-                }
                 }
                 else
                 {

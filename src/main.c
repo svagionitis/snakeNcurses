@@ -5,6 +5,8 @@
 #include <curses.h>
 #include <pthread.h>
 #include <signal.h>
+#include "header.h"
+#include "footer.h"
 #include "utils.h"
 #include "food.h"
 #include "snake.h"
