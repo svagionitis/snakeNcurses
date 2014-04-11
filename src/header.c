@@ -16,22 +16,22 @@ void print_header(WINDOW *win)
     wclear(win);
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "Max Height: "/*, snake_p.height*/);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Height: %d", snake_p.height);
     color_str(win, 0, 0, 0, 0, buf);
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: "/*, snake_p.width*/);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.width);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "SNAKE: Max Height: "/*, snake_p.snake_height*/);
+    char_ret[i] = snprintf(buf, sizeof buf, "SNAKE: Max Height: %d", snake_p.snake_height);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
     memset(buf, '\0', sizeof buf);
-    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: "/*, snake_p.snake_width*/);
+    char_ret[i] = snprintf(buf, sizeof buf, "Max Width: %d", snake_p.snake_width);
     color_str(win, 0, ++header_width, 0, 0, buf);
     header_width += char_ret[i++];
 
