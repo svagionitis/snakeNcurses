@@ -21,38 +21,34 @@ void *print_snake(void *arg)
         // resized and we want to update it.
         getmaxyx(win, snake_p.snake_height, snake_p.snake_width);
 
-        char *body = NULL;
-
         for (int i = 0;i < snake_p.length;i++)
         {
+            int body = '@';
+
             if (snake_p.moves - i >= 0)
             {
                 if (i == 0) // The head of snake
                 {
-                    char *head = NULL;
+                    int head = '\0';
 
                     if (snake_p.ch == KEY_UP)
                     {
-                        head = "^";
-                        body = "@";
+                        head = '^';
                     }
                     else if (snake_p.ch == KEY_DOWN)
                     {
-                        head = "v";
-                        body = "@";
+                        head = 'v';
                     }
                     else if (snake_p.ch == KEY_LEFT)
                     {
-                        head = "<";
-                        body = "@";
+                        head = '<';
                     }
                     else if (snake_p.ch == KEY_RIGHT)
                     {
-                        head = ">";
-                        body = "@";
+                        head = '>';
                     }
 
-                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, head);
+                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, (const char *)&head);
                 }
                 else
                 {
@@ -61,7 +57,7 @@ void *print_snake(void *arg)
                         snake_p.color_fg[snake_p.moves - i] = COLOR_RED;
 #endif
 
-                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, body);
+                    color_str(win, snake_p.move_y[snake_p.moves - i], snake_p.move_x[snake_p.moves - i], snake_p.color_fg[snake_p.moves - i], COLOR_BLACK, (const char *)&body);
 
                     snake_p.color_fg[snake_p.moves - i] = 0;
 
@@ -69,7 +65,7 @@ void *print_snake(void *arg)
             }
             else
             {
-                color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_BLACK, body);
+                color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_BLACK, (const char *)&body);
             }
         }
 
