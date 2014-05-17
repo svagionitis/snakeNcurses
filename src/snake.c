@@ -21,15 +21,15 @@ void *print_snake(void *arg)
         // resized and we want to update it.
         getmaxyx(win, snake_p.snake_height, snake_p.snake_width);
 
-        for (int i = 0;i < snake_p.length;i++)
+        for (int32_t i = 0;i < snake_p.length;i++)
         {
-            int body = '@';
+            int32_t body = '@';
 
             if (snake_p.moves - i >= 0)
             {
                 if (i == 0) // The head of snake
                 {
-                    int head = '\0';
+                    int32_t head = '\0';
 
                     if (snake_p.ch == KEY_UP)
                     {
@@ -83,7 +83,7 @@ void *print_snake(void *arg)
 
 void *control_snake()
 {
-    int last_char = 0;
+    int32_t last_char = 0;
 
     while(snake_p.ch != 'q')
     {

@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdint.h>
 #include "footer.h"
 #include "utils.h"
 #include "snake.h"
@@ -10,8 +11,8 @@ extern food_param_t food_p;
 void print_footer(WINDOW *win)
 {
     char buf[50];
-    int char_ret[9], i = 0;
-    int footer_width = 0;
+    int32_t char_ret[9], i = 0;
+    int32_t footer_width = 0;
 
     wclear(win);
 

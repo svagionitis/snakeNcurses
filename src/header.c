@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdint.h>
 #include "header.h"
 #include "utils.h"
 #include "snake.h"
@@ -10,8 +11,8 @@ extern food_param_t food_p;
 void print_header(WINDOW *win)
 {
     char buf[50];
-    int char_ret[7], i = 0;
-    int header_width = 0;
+    int32_t char_ret[7], i = 0;
+    int32_t header_width = 0;
 
     wclear(win);
 
