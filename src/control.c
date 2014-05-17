@@ -8,21 +8,20 @@ extern pthread_mutex_t lock_snake;
 
 void *control_snake()
 {
-    int32_t last_char = 0;
 
     while(snake_p.ch != 'q')
     {
         // Get keyboard input non-blocking
         snake_p.ch = getch();
         if (snake_p.ch == ERR)
-            snake_p.ch = last_char;
+            snake_p.ch = snake_p.last_char;
         else if (snake_p.ch == 'q')
             break;
 
 #if 1
         // If arrow keys pressed ones, don't have to press it again.
         if (snake_p.ch == KEY_UP || snake_p.ch == KEY_DOWN || snake_p.ch == KEY_LEFT || snake_p.ch == KEY_RIGHT)
-            last_char = snake_p.ch;
+            snake_p.last_char = snake_p.ch;
 #endif
 
         // In thread with the sleep

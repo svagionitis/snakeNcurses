@@ -10,6 +10,7 @@
 typedef struct snake_param
 {
     int32_t     ch;
+    int32_t     last_char;
     int32_t     x;
     int32_t     y;
     int32_t     move_x[MAX_SNAKE_LENGTH];

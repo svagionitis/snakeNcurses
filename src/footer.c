@@ -11,7 +11,7 @@ extern food_param_t food_p;
 void print_footer(WINDOW *win)
 {
     char buf[50];
-    int32_t char_ret[9], i = 0;
+    int32_t char_ret[10], i = 0;
     int32_t footer_width = 0;
 
     wclear(win);
@@ -58,6 +58,11 @@ void print_footer(WINDOW *win)
 
     memset(buf, '\0', sizeof buf);
     char_ret[i] = snprintf(buf, sizeof buf, "length: %d", snake_p.length);
+    color_str(win, 0, ++footer_width, 0, 0, buf);
+    footer_width += char_ret[i++];
+
+    memset(buf, '\0', sizeof buf);
+    char_ret[i] = snprintf(buf, sizeof buf, "char: %c (0x%x)", snake_p.last_char, snake_p.last_char);
     color_str(win, 0, ++footer_width, 0, 0, buf);
     footer_width += char_ret[i++];
 
