@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "food.h"
 #include "snake.h"
+#include "control.h"
 
 
 // Global variables

@@ -26,7 +26,6 @@ typedef struct snake_param
 } snake_param_t;
 
 void *print_snake(void *);
-void *control_snake();
 
 #endif /* SNAKE_H */
 

@@ -22,6 +22,7 @@ SET(SNAKENCURSES_SRC src/header.c
 		     src/utils.c
 		     src/food.c
 		     src/snake.c
+		     src/control.c
 		     src/main.c)
 
 ADD_EXECUTABLE(snake ${SNAKENCURSES_SRC})
