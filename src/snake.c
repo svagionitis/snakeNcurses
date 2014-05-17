@@ -15,8 +15,6 @@ void *print_snake(void *arg)
     {
         wclear(win);
 
-        print_food(win);
-
         // Get the max snake window size because the window could be 
         // resized and we want to update it.
         getmaxyx(win, snake_p.snake_height, snake_p.snake_width);
@@ -68,6 +66,8 @@ void *print_snake(void *arg)
                 color_str(win, snake_p.move_y[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.move_x[MAX_SNAKE_LENGTH - i + snake_p.moves], snake_p.color_fg[MAX_SNAKE_LENGTH - i + snake_p.moves], COLOR_BLACK, (const char *)&body);
             }
         }
+
+        print_food(win);
 
         if (snake_p.set_border)
             wborder(win, '|', '|', '-', '_', '+', '+', '+', '+');
