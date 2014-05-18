@@ -46,6 +46,6 @@ void print_food(WINDOW *win)
     }
 
     // Use default fg and bg color for food
-    color_str(win, food_p.y, food_p.x, 0, COLOR_BLACK, "§");
+    color_str(win, food_p.y, food_p.x, 0, COLOR_BLACK, "F");
 }
 
