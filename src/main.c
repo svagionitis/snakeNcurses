@@ -138,7 +138,6 @@ int main(int argc, char *argv[])
     while(snake_p.ch != 'q')
     {
         print_header(header_win);
-        print_food(snake_win);
         print_footer(footer_win);
 
         doupdate();
