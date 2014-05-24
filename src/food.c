@@ -35,8 +35,8 @@ void print_food(WINDOW *win)
     if (food_p.isFirst || collision_snake_food(snake_p, food_p))
     {
         // Get random range formula from http://c-faq.com/lib/randrange.html and http://stackoverflow.com/a/2509699
-        food_p.x = food_p.food_width * ((double)rand()/RAND_MAX);
-        food_p.y = food_p.food_height * ((double)rand()/RAND_MAX);
+        food_p.x = (food_p.food_width - 1) * ((double)rand()/RAND_MAX);
+        food_p.y = (food_p.food_height - 1) * ((double)rand()/RAND_MAX);
 
         food_p.isFirst = 0;
 
