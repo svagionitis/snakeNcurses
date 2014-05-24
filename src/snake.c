@@ -70,7 +70,7 @@ void *print_snake(void *arg)
         print_food(win);
 
         if (snake_p.set_border)
-            wborder(win, '|', '|', '-', '_', '+', '+', '+', '+');
+            wborder(win, '|', '|', '-', '-', '+', '+', '+', '+');
 
         wnoutrefresh(win);
         usleep(snake_p.speed);
