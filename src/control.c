@@ -33,12 +33,12 @@ void *control_snake()
                 if (snake_p.set_border)
                 {
                     if (snake_p.y <= 0)
-                        snake_p.y = snake_p.snake_height - 1;
+                        snake_p.y = snake_p.snake_height - 2;
                 }
                 else
                 {
                     if (snake_p.y <= -1)
-                        snake_p.y = snake_p.snake_height;
+                        snake_p.y = snake_p.snake_height - 1;
                 }
 
                 snake_p.moves++;
