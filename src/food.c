@@ -29,6 +29,8 @@ void print_food(WINDOW *win)
     // Seed microseconds
     srand(t.tv_usec * t.tv_sec);
 
+    food_p.type = 'F';
+
     // If food is called for first time or the head of snake has the same coordinates
     // with the food, then calculate the new coordinates for food. Increase the length
     // of the snake.
@@ -46,6 +48,6 @@ void print_food(WINDOW *win)
     }
 
     // Use default fg and bg color for food
-    color_str(win, food_p.y, food_p.x, 0, COLOR_BLACK, "F");
+    color_str(win, food_p.y, food_p.x, 0, COLOR_BLACK, (const char *)&food_p.type);
 }
 
